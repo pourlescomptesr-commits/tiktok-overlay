@@ -18,54 +18,60 @@ def notify_flask(endpoint, data):
     except Exception as e:
         print(f"[TikTok Worker Notify Error] {endpoint}: {e}", flush=True)
 
-try:
-    from TikTokLive import TikTokLiveClient
-    from TikTokLive.events import GiftEvent, ConnectEvent, DisconnectEvent
+from TikTokLive import TikTokLiveClient
+from TikTokLive.events import GiftEvent, ConnectEvent, DisconnectEvent
 
-    client = TikTokLiveClient(unique_id=username)
+for attempt in range(1, 6):
+    try:
+        print(f"[TikTok Worker] Tentative {attempt}/5 pour @{username}...", flush=True)
+        client = TikTokLiveClient(unique_id=username)
 
-    @client.on(ConnectEvent)
-    async def on_connect(e):
-        print(f"[TikTok Worker] Connecté à @{username} !", flush=True)
-        notify_flask('/api/internal/tiktok_status', {"status": "on", "user": username})
+        @client.on(ConnectEvent)
+        async def on_connect(e):
+            print(f"[TikTok Worker] Connecté avec succès à @{username} !", flush=True)
+            notify_flask('/api/internal/tiktok_status', {"status": "on", "user": username})
 
-    @client.on(DisconnectEvent)
-    async def on_disconnect(e):
-        print(f"[TikTok Worker] Déconnecté de @{username}", flush=True)
-        notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
+        @client.on(DisconnectEvent)
+        async def on_disconnect(e):
+            print(f"[TikTok Worker] Déconnecté de @{username}", flush=True)
+            notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
 
-    @client.on(GiftEvent)
-    async def on_gift(e):
-        try:
-            u = getattr(e.user, 'unique_id', '') or getattr(e.user, 'username', '')
-            if not u: return
-            nick = getattr(e.user, 'nickname', u) or u
-
-            diamonds = getattr(e.gift, 'diamond_count', 0) or getattr(e.gift, 'coins', 0) or getattr(e.gift, 'value', 0)
-            if diamonds <= 0: diamonds = 1
-            repeat = getattr(e.gift, 'repeat_count', 1) or getattr(e.gift, 'count', 1) or 1
-
-            if getattr(e.gift, 'streakable', False) and not getattr(e.gift, 'repeat_end', True):
-                return
-
-            total_coins = max(1, int(diamonds) * int(repeat))
-
+        @client.on(GiftEvent)
+        async def on_gift(e):
             try:
-                urls = getattr(e.user.avatar, 'urls', [])
-                av = urls[0] if urls else f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
-            except:
-                av = f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+                u = getattr(e.user, 'unique_id', '') or getattr(e.user, 'username', '')
+                if not u: return
+                nick = getattr(e.user, 'nickname', u) or u
 
-            print(f"[TikTok Gift] @{u} ({nick}) -> +{total_coins} 🪙", flush=True)
+                diamonds = getattr(e.gift, 'diamond_count', 0) or getattr(e.gift, 'coins', 0) or getattr(e.gift, 'value', 0)
+                if diamonds <= 0: diamonds = 1
+                repeat = getattr(e.gift, 'repeat_count', 1) or getattr(e.gift, 'count', 1) or 1
 
-            notify_flask('/api/internal/gift', {
-                "u": u, "nick": nick, "av": av, "coins": total_coins
-            })
-        except Exception as gift_err:
-            print(f"[TikTok Worker Gift Err] {gift_err}", flush=True)
+                if getattr(e.gift, 'streakable', False) and not getattr(e.gift, 'repeat_end', True):
+                    return
 
-    asyncio.run(client.start())
-except Exception as ex:
-    print(f"[TikTok Worker Error @{username}] {ex}", flush=True)
-finally:
-    notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
+                total_coins = max(1, int(diamonds) * int(repeat))
+
+                try:
+                    urls = getattr(e.user.avatar, 'urls', [])
+                    av = urls[0] if urls else f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+                except:
+                    av = f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+
+                print(f"[TikTok Gift] @{u} ({nick}) -> +{total_coins} 🪙", flush=True)
+
+                notify_flask('/api/internal/gift', {
+                    "u": u, "nick": nick, "av": av, "coins": total_coins
+                })
+            except Exception as gift_err:
+                print(f"[TikTok Worker Gift Err] {gift_err}", flush=True)
+
+        asyncio.run(client.start())
+        break
+    except Exception as ex:
+        print(f"[TikTok Worker Attempt {attempt} Error @{username}] {ex}", flush=True)
+        if attempt < 5:
+            print(f"[TikTok Worker] Attente 4 secondes avant réessai...", flush=True)
+            time.sleep(4)
+
+notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
