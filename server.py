@@ -414,7 +414,11 @@ def api_player():
                 p["coins"] = 0
         elif a == 'remove':
             u = d.get('u','').strip().lstrip('@')
-            s["players"] = [p for p in s["players"] if p["u"].lower() != u.lower()]
+            idx = d.get('idx')
+            if idx is not None and isinstance(idx, int) and 0 <= idx < len(s["players"]):
+                s["players"].pop(idx)
+            elif u:
+                s["players"] = [p for p in s["players"] if p["u"].lower() != u.lower()]
         elif a == 'clear':
             s["players"] = []
     push_key(key)
