@@ -10,13 +10,17 @@ port = sys.argv[3] if len(sys.argv) > 3 else "3000"
 print(f"[TikTok Worker] Démarrage pour key={key}, user=@{username} (port={port})", flush=True)
 
 def notify_flask(endpoint, data):
-    try:
-        url = f"http://127.0.0.1:{port}{endpoint}"
-        payload = json.dumps({"key": key, **data}).encode('utf-8')
-        req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'})
-        urllib.request.urlopen(req, timeout=3)
-    except Exception as e:
-        print(f"[TikTok Worker Notify Error] {endpoint}: {e}", flush=True)
+    for host in ["127.0.0.1", "localhost", "0.0.0.0"]:
+        try:
+            url = f"http://{host}:{port}{endpoint}"
+            payload = json.dumps({"key": key, **data}).encode('utf-8')
+            req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'})
+            with urllib.request.urlopen(req, timeout=2) as resp:
+                if resp.status == 200:
+                    return
+        except Exception:
+            pass
+    print(f"[TikTok Worker Notify Failed] {endpoint}", flush=True)
 
 from TikTokLive import TikTokLiveClient
 from TikTokLive.events import GiftEvent, ConnectEvent, DisconnectEvent
@@ -24,6 +28,8 @@ from TikTokLive.events import GiftEvent, ConnectEvent, DisconnectEvent
 for attempt in range(1, 6):
     try:
         print(f"[TikTok Worker] Tentative {attempt}/5 pour @{username}...", flush=True)
+        notify_flask('/api/internal/tiktok_status', {"status": "connecting", "user": username})
+
         client = TikTokLiveClient(unique_id=username)
         client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
@@ -72,7 +78,6 @@ for attempt in range(1, 6):
     except Exception as ex:
         print(f"[TikTok Worker Attempt {attempt} Error @{username}] {ex}", flush=True)
         if attempt < 5:
-            print(f"[TikTok Worker] Attente 4 secondes avant réessai...", flush=True)
-            time.sleep(4)
+            time.sleep(3)
 
 notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
