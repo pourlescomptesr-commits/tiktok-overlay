@@ -68,7 +68,7 @@ for attempt in range(1, 6):
             room_id = fetch_room_id(username)
             target = room_id if room_id else username
 
-            client = TikTokLiveClient(unique_id=target, platform=platform, web_proxy=proxy)
+            client = TikTokLiveClient(unique_id=target, platform=platform, web_proxy=proxy, ws_proxy=None)
             client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
             @client.on(ConnectEvent)
