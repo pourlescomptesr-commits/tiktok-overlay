@@ -350,6 +350,14 @@ def api_color():
     push_key(key)
     return jsonify(ok=True)
 
+def stop_tiktok_for_key(key):
+    with LOCK:
+        info = TIKTOK_THREADS.pop(key, None)
+    if info:
+        try:
+            asyncio.run_coroutine_threadsafe(info["client"].disconnect(), info["loop"])
+        except: pass
+
 @app.route('/api/tiktok', methods=['POST'])
 def api_tiktok():
     key = get_key_from_req()
@@ -359,23 +367,17 @@ def api_tiktok():
     if a == 'connect':
         u = request.json.get('user','').lstrip('@')
         if not u: return jsonify(ok=False)
+        stop_tiktok_for_key(key)
         with LOCK:
-            if key in TIKTOK_THREADS:
-                try:
-                    info = TIKTOK_THREADS[key]
-                    asyncio.run_coroutine_threadsafe(info["client"].disconnect(), info["loop"]).result(2)
-                except: pass
-            s["tiktok"] = "connecting"; s["tiktok_user"] = u
+            s["tiktok"] = "connecting"
+            s["tiktok_user"] = u
         push_key(key)
         threading.Thread(target=run_tiktok_for_key, args=(key, u), daemon=True).start()
     elif a == 'disconnect':
+        stop_tiktok_for_key(key)
         with LOCK:
-            if key in TIKTOK_THREADS:
-                try:
-                    info = TIKTOK_THREADS[key]
-                    asyncio.run_coroutine_threadsafe(info["client"].disconnect(), info["loop"]).result(2)
-                except: pass
-            s["tiktok"] = "off"; s["tiktok_user"] = ""
+            s["tiktok"] = "off"
+            s["tiktok_user"] = ""
         push_key(key)
     return jsonify(ok=True)
 
