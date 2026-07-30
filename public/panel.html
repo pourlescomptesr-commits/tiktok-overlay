@@ -256,21 +256,27 @@ input[type="color"]{width:24px;height:24px;border-radius:50%;border:2px solid va
 <script>
 // ── AUTENTIFICATION CLÉ ──────────────────────────────
 const urlParams = new URLSearchParams(window.location.search);
-const KEY = (urlParams.get('key') || localStorage.getItem('user_key') || '').toUpperCase();
+const KEY = (urlParams.get('key') || localStorage.getItem('user_key') || '').toUpperCase().replace(/\s+/g, '');
 
 if (!KEY) { window.location.href = '/'; }
 document.getElementById('key-badge').textContent = `CLÉ: ${KEY}`;
 
 let cfUrl = null;
 
-// ── SSE PAR CLÉ ──────────────────────────────────────
-const es = new EventSource(`/events?key=${KEY}`);
-es.onmessage = e => {
-  try { render(JSON.parse(e.data)); } catch {}
-};
-es.onerror = () => {
-  // Clé invalide ou problème de connexion
-};
+// ── SSE PAR CLÉ (Reconnexion automatique) ────────────
+let es = null;
+function initSSE() {
+  if (es) { try { es.close(); } catch(e){} }
+  es = new EventSource(`/events?key=${KEY}`);
+  es.onmessage = e => {
+    try { render(JSON.parse(e.data)); } catch(err){}
+  };
+  es.onerror = () => {
+    try { es.close(); } catch(e){}
+    setTimeout(initSSE, 2000);
+  };
+}
+initSSE();
 
 function fmt(s) {
   if (!s||isNaN(s)) s=0;
