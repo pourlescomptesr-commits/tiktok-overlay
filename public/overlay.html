@@ -69,18 +69,24 @@ html,body{width:100vw;height:100vh;background:transparent;display:flex;justify-c
 
 <script>
 const urlParams = new URLSearchParams(window.location.search);
-const KEY = (urlParams.get('key') || '').toUpperCase();
+const KEY = (urlParams.get('key') || '').toUpperCase().replace(/\s+/g, '');
 
+let es = null;
+function initSSE() {
+  if (es) { try { es.close(); } catch(e){} }
+  es = new EventSource(`/events?key=${KEY}`);
+  es.onmessage = e => {
+    try { render(JSON.parse(e.data)); } catch(err){}
+  };
+  es.onerror = () => {
+    try { es.close(); } catch(e){}
+    setTimeout(initSSE, 2000);
+  };
+}
 if (!KEY) {
   document.body.innerHTML = '<div class="err-msg">❌ Clé d\'overlay manquante dans l\'URL<br><small>?key=VOTRE_CLE</small></div>';
 } else {
-  const es = new EventSource(`/events?key=${KEY}`);
-  es.onmessage = e => {
-    try { render(JSON.parse(e.data)); } catch {}
-  };
-  es.onerror = () => {
-    // Si clé invalide
-  };
+  initSSE();
 }
 
 function fmt(s) {
