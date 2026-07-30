@@ -41,21 +41,24 @@ def fetch_room_id(user):
 
 from TikTokLive import TikTokLiveClient
 from TikTokLive.events import GiftEvent, ConnectEvent, DisconnectEvent
+from TikTokLive.client.web.routes.fetch_signed_websocket import WebcastPlatform
 
-for attempt in range(1, 6):
+platforms = [WebcastPlatform.WEB, WebcastPlatform.MOBILE]
+
+for platform in platforms:
     try:
-        print(f"[TikTok Worker] Tentative {attempt}/5 pour @{username}...", flush=True)
+        print(f"[TikTok Worker] Essai plate-forme {platform.name} pour @{username}...", flush=True)
         notify_flask('/api/internal/tiktok_status', {"status": "connecting", "user": username})
 
         room_id = fetch_room_id(username)
         target = room_id if room_id else username
 
-        client = TikTokLiveClient(unique_id=target)
+        client = TikTokLiveClient(unique_id=target, platform=platform)
         client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
         @client.on(ConnectEvent)
         async def on_connect(e):
-            print(f"[TikTok Worker] Connecté avec succès à @{username} !", flush=True)
+            print(f"[TikTok Worker] Connecté avec succès à @{username} via {platform.name} !", flush=True)
             notify_flask('/api/internal/tiktok_status', {"status": "on", "user": username})
 
         @client.on(DisconnectEvent)
@@ -96,8 +99,7 @@ for attempt in range(1, 6):
         asyncio.run(client.start())
         break
     except Exception as ex:
-        print(f"[TikTok Worker Attempt {attempt} Error @{username}] {ex}", flush=True)
-        if attempt < 5:
-            time.sleep(3)
+        print(f"[TikTok Worker Platform {platform.name} Error @{username}] {ex}", flush=True)
+        time.sleep(2)
 
 notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
