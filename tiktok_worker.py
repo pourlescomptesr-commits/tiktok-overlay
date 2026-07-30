@@ -1,4 +1,4 @@
-import sys, time, json, asyncio, urllib.request
+import sys, time, json, asyncio, urllib.request, re
 
 if len(sys.argv) < 3:
     sys.exit(1)
@@ -22,6 +22,23 @@ def notify_flask(endpoint, data):
             pass
     print(f"[TikTok Worker Notify Failed] {endpoint}", flush=True)
 
+def fetch_room_id(user):
+    try:
+        url = f"https://www.tiktok.com/@{user}/live"
+        req = urllib.request.Request(url, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+            'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Referer': 'https://www.tiktok.com/'
+        })
+        html = urllib.request.urlopen(req, timeout=5).read().decode('utf-8', errors='ignore')
+        m = re.search(r'"roomId"\s*:\s*"(\d+)"', html) or re.search(r'room_id=(\d+)', html) or re.search(r'"roomId":(\d+)', html)
+        if m:
+            print(f"[TikTok Worker] RoomID extrait avec succès: {m.group(1)}", flush=True)
+            return m.group(1)
+    except Exception as e:
+        print(f"[TikTok Worker RoomID Scrape Error] {e}", flush=True)
+    return None
+
 from TikTokLive import TikTokLiveClient
 from TikTokLive.events import GiftEvent, ConnectEvent, DisconnectEvent
 
@@ -30,7 +47,10 @@ for attempt in range(1, 6):
         print(f"[TikTok Worker] Tentative {attempt}/5 pour @{username}...", flush=True)
         notify_flask('/api/internal/tiktok_status', {"status": "connecting", "user": username})
 
-        client = TikTokLiveClient(unique_id=username)
+        room_id = fetch_room_id(username)
+        target = room_id if room_id else username
+
+        client = TikTokLiveClient(unique_id=target)
         client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
         @client.on(ConnectEvent)
