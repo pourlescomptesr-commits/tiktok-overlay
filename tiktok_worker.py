@@ -22,6 +22,19 @@ def notify_flask(endpoint, data):
             pass
     print(f"[TikTok Worker Notify Failed] {endpoint}", flush=True)
 
+def fetch_free_proxy():
+    try:
+        url = "https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=2500&country=all&ssl=all&anonymity=all"
+        data = urllib.request.urlopen(url, timeout=3).read().decode('utf-8')
+        proxies = [p.strip() for p in data.strip().split('\n') if p.strip()]
+        if proxies:
+            p = proxies[0]
+            print(f"[TikTok Worker] Proxy automatique obtenu: {p}", flush=True)
+            return f"http://{p}"
+    except Exception as e:
+        print(f"[TikTok Worker Proxy Fetch Err] {e}", flush=True)
+    return None
+
 def fetch_room_id(user):
     try:
         url = f"https://www.tiktok.com/@{user}/live"
@@ -45,61 +58,63 @@ from TikTokLive.client.web.routes.fetch_signed_websocket import WebcastPlatform
 
 platforms = [WebcastPlatform.WEB, WebcastPlatform.MOBILE]
 
-for platform in platforms:
-    try:
-        print(f"[TikTok Worker] Essai plate-forme {platform.name} pour @{username}...", flush=True)
-        notify_flask('/api/internal/tiktok_status', {"status": "connecting", "user": username})
+for attempt in range(1, 6):
+    proxy = fetch_free_proxy()
+    for platform in platforms:
+        try:
+            print(f"[TikTok Worker] Essai plate-forme {platform.name} pour @{username} (proxy={proxy})...", flush=True)
+            notify_flask('/api/internal/tiktok_status', {"status": "connecting", "user": username})
 
-        room_id = fetch_room_id(username)
-        target = room_id if room_id else username
+            room_id = fetch_room_id(username)
+            target = room_id if room_id else username
 
-        client = TikTokLiveClient(unique_id=target, platform=platform)
-        client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+            client = TikTokLiveClient(unique_id=target, platform=platform, web_proxy=proxy)
+            client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
-        @client.on(ConnectEvent)
-        async def on_connect(e):
-            print(f"[TikTok Worker] Connecté avec succès à @{username} via {platform.name} !", flush=True)
-            notify_flask('/api/internal/tiktok_status', {"status": "on", "user": username})
+            @client.on(ConnectEvent)
+            async def on_connect(e):
+                print(f"[TikTok Worker] Connecté avec succès à @{username} via {platform.name} !", flush=True)
+                notify_flask('/api/internal/tiktok_status', {"status": "on", "user": username})
 
-        @client.on(DisconnectEvent)
-        async def on_disconnect(e):
-            print(f"[TikTok Worker] Déconnecté de @{username}", flush=True)
-            notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
+            @client.on(DisconnectEvent)
+            async def on_disconnect(e):
+                print(f"[TikTok Worker] Déconnecté de @{username}", flush=True)
+                notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
 
-        @client.on(GiftEvent)
-        async def on_gift(e):
-            try:
-                u = getattr(e.user, 'unique_id', '') or getattr(e.user, 'username', '')
-                if not u: return
-                nick = getattr(e.user, 'nickname', u) or u
-
-                diamonds = getattr(e.gift, 'diamond_count', 0) or getattr(e.gift, 'coins', 0) or getattr(e.gift, 'value', 0)
-                if diamonds <= 0: diamonds = 1
-                repeat = getattr(e.gift, 'repeat_count', 1) or getattr(e.gift, 'count', 1) or 1
-
-                if getattr(e.gift, 'streakable', False) and not getattr(e.gift, 'repeat_end', True):
-                    return
-
-                total_coins = max(1, int(diamonds) * int(repeat))
-
+            @client.on(GiftEvent)
+            async def on_gift(e):
                 try:
-                    urls = getattr(e.user.avatar, 'urls', [])
-                    av = urls[0] if urls else f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
-                except:
-                    av = f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+                    u = getattr(e.user, 'unique_id', '') or getattr(e.user, 'username', '')
+                    if not u: return
+                    nick = getattr(e.user, 'nickname', u) or u
 
-                print(f"[TikTok Gift] @{u} ({nick}) -> +{total_coins} 🪙", flush=True)
+                    diamonds = getattr(e.gift, 'diamond_count', 0) or getattr(e.gift, 'coins', 0) or getattr(e.gift, 'value', 0)
+                    if diamonds <= 0: diamonds = 1
+                    repeat = getattr(e.gift, 'repeat_count', 1) or getattr(e.gift, 'count', 1) or 1
 
-                notify_flask('/api/internal/gift', {
-                    "u": u, "nick": nick, "av": av, "coins": total_coins
-                })
-            except Exception as gift_err:
-                print(f"[TikTok Worker Gift Err] {gift_err}", flush=True)
+                    if getattr(e.gift, 'streakable', False) and not getattr(e.gift, 'repeat_end', True):
+                        return
 
-        asyncio.run(client.start())
-        break
-    except Exception as ex:
-        print(f"[TikTok Worker Platform {platform.name} Error @{username}] {ex}", flush=True)
-        time.sleep(2)
+                    total_coins = max(1, int(diamonds) * int(repeat))
+
+                    try:
+                        urls = getattr(e.user.avatar, 'urls', [])
+                        av = urls[0] if urls else f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+                    except:
+                        av = f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+
+                    print(f"[TikTok Gift] @{u} ({nick}) -> +{total_coins} 🪙", flush=True)
+
+                    notify_flask('/api/internal/gift', {
+                        "u": u, "nick": nick, "av": av, "coins": total_coins
+                    })
+                except Exception as gift_err:
+                    print(f"[TikTok Worker Gift Err] {gift_err}", flush=True)
+
+            asyncio.run(client.start())
+            break
+        except Exception as ex:
+            print(f"[TikTok Worker Platform {platform.name} Error @{username}] {ex}", flush=True)
+            time.sleep(2)
 
 notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
