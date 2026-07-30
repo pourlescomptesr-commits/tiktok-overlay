@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Overlay Stream — TikTok Auction Live</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100vw;height:100vh;background:transparent;display:flex;justify-content:center;align-items:center;overflow:hidden}
+
+.ov-card{
+  width:315px;background:rgba(7,8,15,.95);border:2.5px solid #ffd700;
+  border-radius:20px;padding:15px;display:flex;flex-direction:column;align-items:center;gap:10px;
+  box-shadow:0 0 30px rgba(255,215,0,.25);transition:border-color .3s,box-shadow .3s;
+  font-family:'Outfit',sans-serif;color:#fff;
+}
+.ov-top{background:rgba(0,0,0,.85);border:1.5px solid #ffd700;border-radius:30px;
+  padding:5px 18px;font-size:.82rem;font-weight:800;display:flex;align-items:center;gap:7px;transition:border-color .3s;letter-spacing:1px}
+.ov-mid{display:flex;gap:7px;width:100%;justify-content:center}
+.ov-pill{background:rgba(0,0,0,.85);border-radius:30px;padding:4px 13px;font-size:.7rem;font-weight:800;display:flex;align-items:center;gap:4px}
+.ov-pill.min{border:1.5px solid #ffd700;transition:border-color .3s}
+.ov-pill.snipe{border:1.5px solid rgba(255,255,255,.15)}
+.ov-pill.snipe.hot{border-color:#ff3b5c}
+.ov-pill .hl{color:#ffd700;transition:color .3s}
+.ov-pill.snipe .hl{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:.66rem}
+.ov-pill.snipe.hot .hl{background:#ff3b5c}
+.ov-timer{font-family:'Share Tech Mono',monospace;font-size:3.2rem;color:#39ff14;
+  text-shadow:0 0 16px rgba(57,255,20,.55);letter-spacing:2px;line-height:1;transition:color .3s}
+.ov-timer.warn{color:#ffaa00;text-shadow:0 0 16px rgba(255,170,0,.7)}
+.ov-timer.snipe{color:#ff3b5c;text-shadow:0 0 16px rgba(255,59,92,.7);animation:blink .8s ease infinite alternate}
+@keyframes blink{from{opacity:1}to{opacity:.45}}
+
+.ranks{width:100%;display:flex;flex-direction:column;gap:7px}
+.rrow{background:rgba(0,0,0,.68);border:1px solid rgba(255,255,255,.06);
+  border-radius:11px;padding:7px 11px;display:flex;align-items:center;gap:9px;height:48px;
+  transition:border-color .3s,box-shadow .3s}
+.rrow.r1{border-color:rgba(255,215,0,.4);box-shadow:0 0 10px rgba(255,215,0,.12)}
+.rrow.r2{border-color:rgba(180,180,190,.28)}
+.rrow.r3{border-color:rgba(205,127,50,.28)}
+.rbadge{width:23px;height:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:900;flex-shrink:0;background:rgba(255,255,255,.07);color:rgba(255,255,255,.35)}
+.r1 .rbadge{background:#ffd700;color:#000;box-shadow:0 0 8px rgba(255,215,0,.5)}
+.r2 .rbadge{background:#b4b4be;color:#000}
+.r3 .rbadge{background:#cd7f32;color:#fff}
+.rav{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.13);flex-shrink:0;background:rgba(255,255,255,.04)}
+.rname{flex:1;font-size:.82rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rcoins{font-size:.85rem;font-weight:800;display:flex;align-items:center;gap:5px}
+.ddots{display:flex;gap:3px}
+.dd{width:6px;height:6px;border-radius:50%;background:#ffd700;box-shadow:0 0 4px #ffd700}
+
+.ov-bot{background:rgba(0,0,0,.85);border:1.5px solid rgba(127,0,255,.4);
+  border-radius:20px;padding:4px 14px;font-size:.72rem;font-weight:700;display:flex;align-items:center;gap:6px}
+
+.err-msg{background:rgba(255,59,92,0.9);color:#fff;padding:20px;border-radius:14px;font-family:'Outfit',sans-serif;font-weight:800;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="ov-card" id="ov-card">
+  <div class="ov-top" id="ov-top">⭐ <span id="ov-coins">0</span> VOUCHES</div>
+  <div class="ov-mid">
+    <div class="ov-pill min" id="ov-min">✅ MIN : <span class="hl">1</span>🪙</div>
+    <div class="ov-pill snipe" id="ov-snipe">🛡️ SNIPE <span class="hl">10S</span></div>
+  </div>
+  <div class="ov-timer" id="ov-timer">01:00.0</div>
+  <div class="ranks" id="ov-ranks"></div>
+  <div class="ov-bot">👥 Total participants : <span id="ov-tot">0</span></div>
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const KEY = (urlParams.get('key') || '').toUpperCase();
+
+if (!KEY) {
+  document.body.innerHTML = '<div class="err-msg">❌ Clé d\'overlay manquante dans l\'URL<br><small>?key=VOTRE_CLE</small></div>';
+} else {
+  const es = new EventSource(`/events?key=${KEY}`);
+  es.onmessage = e => {
+    try { render(JSON.parse(e.data)); } catch {}
+  };
+  es.onerror = () => {
+    // Si clé invalide
+  };
+}
+
+function fmt(s) {
+  if (!s||isNaN(s)) s=0;
+  const m = Math.floor(s/60), sec = Math.floor(s%60);
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function render(s) {
+  const c = s.color||'#ffd700';
+  const card = document.getElementById('ov-card');
+  card.style.borderColor = c; card.style.boxShadow = `0 0 30px ${c}38`;
+  document.getElementById('ov-top').style.borderColor = c;
+  document.getElementById('ov-coins').textContent = s.players.reduce((a,p)=>a+p.coins,0);
+  const minPill = document.getElementById('ov-min');
+  minPill.style.borderColor = c;
+  if (s.min_bid_enabled) {
+    minPill.style.display = 'flex';
+    minPill.innerHTML = `✅ MIN : <span class="hl">${s.min_bid_val||1}</span>🪙`;
+  } else {
+    minPill.style.display = 'none';
+  }
+  
+  const sEl = document.getElementById('ov-snipe');
+  sEl.className = 'ov-pill snipe' + (s.snipe_on?' hot':'');
+  sEl.innerHTML = `🛡️ SNIPE <span class="hl">${s.snipe_on?Math.ceil(s.snipe_rem)+'S':Math.ceil(s.snipe_dur)+'S'}</span>`;
+
+  const sec = s.snipe_on ? s.snipe_rem : s.timer_rem;
+  const pt = document.getElementById('ov-timer');
+  pt.textContent = fmt(sec);
+  pt.className = 'ov-timer' + (s.snipe_on?' snipe':s.timer_on&&s.timer_rem<s.snipe_dur?' warn':'');
+  document.getElementById('ov-tot').textContent = s.players.length;
+
+  const top3 = s.players.slice(0,3);
+  document.getElementById('ov-ranks').innerHTML = [0,1,2].map(i => {
+    const p = top3[i], cls=['r1','r2','r3'][i];
+    return p ? `<div class="rrow ${cls}">
+      <div class="rbadge">${i+1}</div>
+      <img class="rav" src="${p.av}" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
+      <div class="rname">${esc(p.name)}</div>
+      <div class="rcoins">${p.coins}<div class="ddots"><div class="dd"></div><div class="dd"></div></div></div>
+    </div>` :
+    `<div class="rrow" style="opacity:.25"><div class="rbadge">${i+1}</div><div class="rav"></div><div class="rname" style="color:#444">—</div></div>`;
+  }).join('');
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.getElementById('ov-ranks').innerHTML = [1,2,3].map(i=>
+  `<div class="rrow" style="opacity:.25"><div class="rbadge">${i}</div><div class="rav"></div><div class="rname" style="color:#444">—</div></div>`
+).join('');
+</script>
+</body>
+</html>
