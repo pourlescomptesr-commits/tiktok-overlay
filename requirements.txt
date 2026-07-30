@@ -2,4 +2,3 @@ Flask
 TikTokLive
 requests
 gunicorn
-gevent
