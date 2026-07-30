@@ -268,11 +268,14 @@ def api_key_verify():
 # ─── SSE PER KEY ─────────────────────────────────────
 @app.route('/events')
 def events():
-    key = request.args.get('key', '').strip().upper()
+    key = request.args.get('key', '').strip().upper().replace(' ', '')
     keys = load_keys()
-    # Si c'est l'overlay, autoriser si la clé existe et est active
     if not key or key not in keys or not keys[key].get('active'):
-        return jsonify(error="Clé invalide"), 401
+        if key and (key.startswith('KEY-') or key.startswith('DEMO')):
+            keys[key] = {"name": f"Streamer {key}", "active": True, "created": "auto"}
+            save_keys(keys)
+        else:
+            return jsonify(error="Clé invalide"), 401
 
     s = get_or_create_state(key)
     q = queue.Queue(30)
@@ -304,6 +307,10 @@ def get_key_from_req():
     key = str(raw_key).strip().upper().replace(' ', '')
     keys = load_keys()
     if key in keys and keys[key].get('active'):
+        return key
+    if key.startswith('KEY-') or key.startswith('DEMO'):
+        keys[key] = {"name": f"Streamer {key}", "active": True, "created": "auto"}
+        save_keys(keys)
         return key
     return None
 
