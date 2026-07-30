@@ -75,22 +75,19 @@ def global_timer_loop():
         with LOCK:
             keys_to_push = []
             for key, s in STATES.items():
-                changed = False
                 if s["timer_on"]:
                     s["timer_rem"] = max(0.0, s["timer_rem"] - dt)
-                    changed = True
                     if s["timer_rem"] == 0:
                         s["timer_on"] = False
                         if s["snipe_dur"] > 0:
                             s["snipe_on"] = True
                             s["snipe_rem"] = s["snipe_dur"]
+                        keys_to_push.append(key)
                 elif s["snipe_on"]:
                     s["snipe_rem"] = max(0.0, s["snipe_rem"] - dt)
-                    changed = True
                     if s["snipe_rem"] == 0:
                         s["snipe_on"] = False
-                if changed:
-                    keys_to_push.append(key)
+                        keys_to_push.append(key)
         for k in keys_to_push:
             push_key(k)
 
@@ -160,23 +157,48 @@ def run_tiktok_for_key(key, username):
 
         @client.on(GiftEvent)
         async def on_gift(e):
-            if e.gift.diamond_count <= 0: return
-            u = e.user.unique_id
-            nick = e.user.nickname
-            coins = e.gift.diamond_count * e.gift.repeat_count
-            try: av = e.user.avatar.urls[0] if e.user.avatar.urls else f"https://unavatar.io/tiktok/{u}"
-            except: av = f"https://unavatar.io/tiktok/{u}"
-            with LOCK:
-                s = get_or_create_state(key)
-                found = False
-                for p in s["players"]:
-                    if p["u"].lower() == u.lower():
-                        p["coins"] += coins; found = True; break
-                if not found:
-                    s["players"].append({"u":u,"name":nick,"av":av,"coins":coins})
-                s["players"].sort(key=lambda x:x["coins"], reverse=True)
-                trigger_snipe_key(s)
-            push_key(key)
+            try:
+                u = getattr(e.user, 'unique_id', '') or getattr(e.user, 'username', '')
+                if not u: return
+                nick = getattr(e.user, 'nickname', u) or u
+
+                # Calcul du nombre de pièces (diamants ou pièces du cadeau)
+                diamonds = getattr(e.gift, 'diamond_count', 0) or getattr(e.gift, 'coins', 0) or getattr(e.gift, 'value', 0)
+                if diamonds <= 0:
+                    diamonds = 1 # Fallback pour les cadeaux à 1 pièce (Roses, TikTok, etc.)
+                
+                repeat = getattr(e.gift, 'repeat_count', 1) or getattr(e.gift, 'count', 1) or 1
+
+                # Gestion des séries (streaks) : ne prendre que le total de la série quand elle est terminée
+                if getattr(e.gift, 'streakable', False) and not getattr(e.gift, 'repeat_end', True):
+                    return
+
+                total_coins = max(1, int(diamonds) * int(repeat))
+
+                try:
+                    urls = getattr(e.user.avatar, 'urls', [])
+                    av = urls[0] if urls else f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+                except:
+                    av = f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+
+                print(f"[TikTok Gift Key={key}] @{u} ({nick}) a envoyé {getattr(e.gift,'name','cadeau')} -> +{total_coins} 🪙", flush=True)
+
+                with LOCK:
+                    s = get_or_create_state(key)
+                    found = False
+                    for p in s["players"]:
+                        if p["u"].lower() == u.lower():
+                            p["coins"] += total_coins
+                            p["name"] = nick
+                            found = True
+                            break
+                    if not found:
+                        s["players"].append({"u": u, "name": nick, "av": av, "coins": total_coins})
+                    s["players"].sort(key=lambda x: x["coins"], reverse=True)
+                    trigger_snipe_key(s)
+                push_key(key)
+            except Exception as gift_err:
+                print(f"[TikTok Gift Error] {gift_err}", flush=True)
 
         loop.run_until_complete(client.start())
     except Exception as ex:
@@ -206,27 +228,19 @@ def fetch_profile(u):
 # ─── ROUTES CLIENT (HTML) ─────────────────────────────
 @app.route('/')
 def route_login():
-    p = os.path.join(PUBLIC, 'login.html')
-    with open(p, 'r', encoding='utf-8') as f:
-        return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    return send_from_directory(PUBLIC, 'login.html')
 
 @app.route('/panel')
 def route_panel():
-    p = os.path.join(PUBLIC, 'panel.html')
-    with open(p, 'r', encoding='utf-8') as f:
-        return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    return send_from_directory(PUBLIC, 'panel.html')
 
 @app.route('/overlay')
 def route_overlay():
-    p = os.path.join(PUBLIC, 'overlay.html')
-    with open(p, 'r', encoding='utf-8') as f:
-        return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    return send_from_directory(PUBLIC, 'overlay.html')
 
 @app.route('/admin')
 def route_admin():
-    p = os.path.join(PUBLIC, 'admin.html')
-    with open(p, 'r', encoding='utf-8') as f:
-        return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    return send_from_directory(PUBLIC, 'admin.html')
 
 # ─── API AUTH & VERIFICATION DE CLÉ ──────────────────
 @app.route('/api/key/verify', methods=['POST'])
@@ -398,6 +412,11 @@ def api_player():
         elif a == 'reset_coins':
             for p in s["players"]:
                 p["coins"] = 0
+        elif a == 'remove':
+            u = d.get('u','').strip().lstrip('@')
+            s["players"] = [p for p in s["players"] if p["u"].lower() != u.lower()]
+        elif a == 'clear':
+            s["players"] = []
     push_key(key)
     return jsonify(ok=True)
 
