@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Panel TikTok Auction Live</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080f;--card:#0f1120;--border:rgba(255,255,255,0.07);
+  --txt:#e8eaf6;--muted:#555972;--gold:#ffd700;--red:#ff3b5c;--green:#00e676;--blue:#00c8ff;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+.bar{
+  background:#0a0b14;border-bottom:1px solid var(--border);
+  padding:0 18px;height:50px;flex-shrink:0;
+  display:flex;align-items:center;gap:10px;
+}
+.logo{font-weight:900;font-size:.95rem;letter-spacing:2px;text-transform:uppercase;
+  background:linear-gradient(90deg,#ff007f,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.divider{width:1px;height:18px;background:var(--border)}
+.cf-pill{
+  display:flex;align-items:center;gap:7px;flex:1;max-width:380px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;
+  padding:4px 12px;font-size:.73rem;cursor:pointer;transition:border-color .2s;
+}
+.cf-pill:hover{border-color:rgba(255,255,255,.15)}
+.cf-url{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--blue);font-weight:700}
+.cf-wait{color:var(--muted);font-style:italic}
+.tik-pill{
+  display:flex;align-items:center;gap:6px;padding:4px 12px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:20px;
+  font-size:.75rem;font-weight:600;white-space:nowrap;
+}
+.dot{width:7px;height:7px;border-radius:50%}
+.dot.r{background:var(--red)}.dot.g{background:var(--green);box-shadow:0 0 5px var(--green)}.dot.o{background:#ffaa00}
+.bar-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.key-badge{background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);color:var(--gold);padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:800;letter-spacing:1px}
+.btn-ov{
+  padding:5px 13px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.25);
+  border-radius:7px;color:var(--blue);font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;
+}
+.btn-ov:hover{background:rgba(0,200,255,.2);border-color:var(--blue)}
+.btn-logout{padding:5px 10px;background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.25);border-radius:7px;color:var(--red);font-size:0.75rem;font-weight:700;cursor:pointer}
+
+.main{flex:1;display:grid;grid-template-columns:320px 1fr;overflow:hidden}
+.side{background:var(--card);border-right:1px solid var(--border);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.side::-webkit-scrollbar{width:3px}.side::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08)}
+
+.stitle{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.chrono-card{background:#0a0b14;border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.chrono-num{font-family:'Share Tech Mono',monospace;font-size:2.6rem;line-height:1;color:#39ff14;text-shadow:0 0 12px rgba(57,255,20,.5);transition:color .3s}
+.chrono-num.warn{color:#ffaa00;text-shadow:0 0 12px rgba(255,170,0,.6)}
+.chrono-num.snipe{color:var(--red);text-shadow:0 0 12px rgba(255,59,92,.7);animation:blink .8s ease infinite alternate}
+@keyframes blink{from{opacity:1}to{opacity:.4}}
+.chrono-lbl{font-size:.68rem;color:var(--muted);letter-spacing:1px;margin-top:3px}
+
+.brow{display:flex;gap:7px}
+.b{flex:1;padding:9px 6px;border:none;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:700;font-size:.8rem;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .15s}
+.b:active{transform:scale(.96)}
+.bg2{background:#00b847;color:#fff}.bg2:hover{background:var(--green);color:#000}
+.bgr{background:rgba(255,255,255,.07);color:#fff}.bgr:hover{background:rgba(255,255,255,.13)}
+.br{background:var(--red);color:#fff}.br:hover{filter:brightness(1.15)}
+.bb{background:var(--blue);color:#000}.bb:hover{filter:brightness(1.15)}
+
+.f{display:flex;flex-direction:column;gap:4px}
+.f label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+.f input,.f select{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--txt);padding:8px 10px;border-radius:7px;font-family:'Outfit',sans-serif;font-size:.86rem;outline:none;transition:border-color .2s}
+.f input:focus,.f select:focus{border-color:var(--gold)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sep{border:none;border-top:1px solid var(--border)}
+
+.crow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cd{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s}
+.cd:hover,.cd.on{transform:scale(1.2);border-color:#fff}
+input[type="color"]{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);cursor:pointer;padding:0;background:none}
+
+.right{display:grid;grid-template-rows:1fr auto;overflow:hidden}
+.preview{display:flex;justify-content:center;align-items:center;background:radial-gradient(ellipse at center,#111320 0%,#07080f 100%);overflow:auto;padding:20px}
+
+.ov-card{width:305px;background:rgba(7,8,15,.95);border:2px solid var(--gold);border-radius:18px;padding:13px;display:flex;flex-direction:column;align-items:center;gap:9px;box-shadow:0 0 28px rgba(255,215,0,.2);transition:border-color .3s,box-shadow .3s}
+.ov-top{background:rgba(0,0,0,.85);border:1.5px solid var(--gold);border-radius:30px;padding:4px 16px;font-size:.78rem;font-weight:800;display:flex;align-items:center;gap:6px;transition:border-color .3s}
+.ov-mid{display:flex;gap:7px;width:100%;justify-content:center}
+.ov-pill{background:rgba(0,0,0,.85);border-radius:30px;padding:3px 12px;font-size:.68rem;font-weight:800;display:flex;align-items:center;gap:4px}
+.ov-pill.min{border:1.5px solid var(--gold);transition:border-color .3s}
+.ov-pill.snipe{border:1.5px solid rgba(255,255,255,.12)}
+.ov-pill.snipe.hot{border-color:var(--red)}
+.ov-pill .hl{color:var(--gold);transition:color .3s}
+.ov-pill.snipe .hl{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:.64rem}
+.ov-pill.snipe.hot .hl{background:var(--red)}
+.ov-timer{font-family:'Share Tech Mono',monospace;font-size:3rem;color:#39ff14;text-shadow:0 0 14px rgba(57,255,20,.5);letter-spacing:2px;line-height:1;transition:color .3s}
+.ov-timer.warn{color:#ffaa00;text-shadow:0 0 14px rgba(255,170,0,.7)}
+.ov-timer.snipe{color:var(--red);text-shadow:0 0 14px rgba(255,59,92,.7);animation:blink .8s ease infinite alternate}
+.ranks{width:100%;display:flex;flex-direction:column;gap:6px}
+.rrow{background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:6px 10px;display:flex;align-items:center;gap:8px;height:46px;transition:border-color .3s,box-shadow .3s}
+.rrow.r1{border-color:rgba(255,215,0,.35);box-shadow:0 0 8px rgba(255,215,0,.1)}
+.rrow.r2{border-color:rgba(180,180,190,.25)}
+.rrow.r3{border-color:rgba(205,127,50,.25)}
+.rbadge{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;flex-shrink:0;background:rgba(255,255,255,.07);color:rgba(255,255,255,.35)}
+.r1 .rbadge{background:var(--gold);color:#000;box-shadow:0 0 7px rgba(255,215,0,.5)}
+.r2 .rbadge{background:#b4b4be;color:#000}
+.r3 .rbadge{background:#cd7f32;color:#fff}
+.rav{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.12);flex-shrink:0;background:rgba(255,255,255,.04)}
+.rname{flex:1;font-size:.78rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rcoins{font-size:.8rem;font-weight:800;display:flex;align-items:center;gap:4px}
+.ddots{display:flex;gap:2px}
+.dd{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 3px var(--gold)}
+.ov-bot{background:rgba(0,0,0,.85);border:1.5px solid rgba(127,0,255,.4);border-radius:20px;padding:3px 13px;font-size:.68rem;font-weight:700;display:flex;align-items:center;gap:5px}
+
+.pp{border-top:1px solid var(--border);background:var(--card);padding:13px;display:flex;flex-direction:column;gap:9px;max-height:310px}
+.add-row{display:flex;gap:7px}
+.add-row input{flex:1}
+.plist{overflow-y:auto;display:flex;flex-direction:column;gap:5px;max-height:200px}
+.plist::-webkit-scrollbar{width:3px}.plist::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08)}
+.prow{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;padding:5px 9px;transition:border-color .2s}
+.prow:hover{border-color:rgba(255,255,255,.1)}
+.pav{width:27px;height:27px;border-radius:50%;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.05)}
+.pinfo{flex:1;overflow:hidden}
+.pname{font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pun{font-size:.66rem;color:var(--muted)}
+.pcoins{font-weight:800;color:var(--gold);font-size:.85rem;margin:0 3px;white-space:nowrap}
+.qb{padding:2px 7px;font-size:.68rem;border-radius:5px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;transition:all .15s;flex-shrink:0}
+.qb:hover{background:rgba(255,255,255,.1)}
+.qb.del{color:var(--red);border-color:rgba(255,59,92,.2)}.qb.del:hover{background:rgba(255,59,92,.1)}
+.ci{width:58px;padding:2px 5px;font-size:.75rem;text-align:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;color:#fff;font-family:'Outfit',sans-serif;outline:none}
+.ci:focus{border-color:var(--gold)}
+.empty{text-align:center;color:var(--muted);font-size:.78rem;padding:12px}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:7px 20px;border-radius:8px;font-weight:700;font-size:.82rem;z-index:999;display:none;animation:pop .2s ease}
+@keyframes pop{from{transform:translateX(-50%) scale(.9)}to{transform:translateX(-50%) scale(1)}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="logo">🎯 Auction Live</div>
+  <div class="divider"></div>
+  <div class="cf-pill" onclick="copyCf()" title="Cliquer pour copier">
+    <span>🌍</span>
+    <span class="cf-wait cf-url" id="cf-url">Lien Cloudflare en attente...</span>
+    <span style="font-size:.6rem;color:var(--muted)">📋</span>
+  </div>
+  <div class="tik-pill">
+    <span class="dot r" id="tik-dot"></span>
+    <span id="tik-txt">TikTok OFF</span>
+  </div>
+  <div class="bar-r">
+    <span class="key-badge" id="key-badge">CLÉ: ---</span>
+    <button class="btn-ov" onclick="copyOv()">📺 Copier Overlay</button>
+    <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="side">
+    <div>
+      <div class="stitle">⏱ Chronomètre</div>
+      <div class="chrono-card">
+        <div class="chrono-num" id="cn">01:00.0</div>
+        <div class="chrono-lbl" id="cl">En attente</div>
+      </div>
+    </div>
+    <div class="brow">
+      <button class="b bg2" onclick="timer('start')">▶ Start</button>
+      <button class="b bgr" onclick="timer('pause')">⏸ Pause</button>
+      <button class="b br"  onclick="timer('reset')">↺ Reset</button>
+    </div>
+    <div class="g2">
+      <div class="f"><label>Durée (sec)</label><input id="c-dur" type="number" value="60" min="5" onchange="setTimer()"></div>
+      <div class="f"><label>Snipe Delay (s)</label><input id="c-snipe" type="number" value="10" min="0" onchange="setTimer()"></div>
+    </div>
+
+    <hr class="sep">
+    <div>
+      <div class="stitle">🎯 Minimum d'enchère</div>
+      <div class="g2">
+        <div class="f">
+          <label>Option</label>
+          <select id="min-mode" onchange="updateMinConfig()">
+            <option value="none">Pas de minimum</option>
+            <option value="min">Minimum fixe</option>
+          </select>
+        </div>
+        <div class="f" id="min-val-box" style="display:none">
+          <label>Montant 🪙</label>
+          <input id="min-val-input" type="number" value="10" min="1" onchange="updateMinConfig()">
+        </div>
+      </div>
+    </div>
+
+    <hr class="sep">
+    <div>
+      <div class="stitle">🎨 Couleur</div>
+      <div class="crow">
+        <div class="cd on" style="background:#ffd700" onclick="setColor('#ffd700',this)"></div>
+        <div class="cd" style="background:#fff" onclick="setColor('#ffffff',this)"></div>
+        <div class="cd" style="background:#ff007f" onclick="setColor('#ff007f',this)"></div>
+        <div class="cd" style="background:#9c27b0" onclick="setColor('#9c27b0',this)"></div>
+        <div class="cd" style="background:#00bcd4" onclick="setColor('#00bcd4',this)"></div>
+        <div class="cd" style="background:#00e676" onclick="setColor('#00e676',this)"></div>
+        <div class="cd" style="background:#ff3b5c" onclick="setColor('#ff3b5c',this)"></div>
+        <input type="color" value="#ffd700" onchange="setColor(this.value,null)">
+      </div>
+    </div>
+
+    <hr class="sep">
+    <div>
+      <div class="stitle">🔴 TikTok Live</div>
+      <div style="display:flex;gap:7px">
+        <div class="f" style="flex:1"><input id="tt-user" type="text" placeholder="@votre_tiktok"></div>
+        <button class="b br" style="flex:none;width:auto;padding:0 12px" onclick="tikConnect()">LIVE</button>
+        <button class="b bgr" style="flex:none;width:36px;padding:0" onclick="tikDisconnect()" title="Stop">✕</button>
+      </div>
+      <p style="font-size:.65rem;color:var(--muted);margin-top:6px;line-height:1.4">Les cadeaux TikTok sont convertis automatiquement en pièces.</p>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="preview">
+      <div class="ov-card" id="pv-card">
+        <div class="ov-top" id="pv-top">⭐ <span id="pv-coins">0</span> VOUCHES</div>
+        <div class="ov-mid">
+          <div class="ov-pill min" id="pv-min">✅ MIN : <span class="hl">1</span>🪙</div>
+          <div class="ov-pill snipe" id="pv-snipe">🛡️ SNIPE <span class="hl">10S</span></div>
+        </div>
+        <div class="ov-timer" id="pv-timer">01:00.0</div>
+        <div class="ranks" id="pv-ranks"></div>
+        <div class="ov-bot">👥 Participants : <span id="pv-tot">0</span></div>
+      </div>
+    </div>
+
+    <div class="pp">
+      <div class="stitle" style="margin:0">👥 Joueurs — Ajouter / Gérer les pièces</div>
+      <div class="add-row">
+        <input id="p-u" type="text" placeholder="@pseudo_tiktok" onkeydown="if(event.key==='Enter')addP()">
+        <input id="p-c" type="number" value="100" min="0" style="width:80px" placeholder="🪙">
+        <button class="b bb" style="flex:none;width:auto;padding:0 13px" onclick="addP()">+ Ajouter</button>
+        <button class="b br" style="flex:none;width:36px;padding:0" onclick="clearAll()" title="Tout effacer">🗑</button>
+      </div>
+      <div class="add-row" style="margin-top:2px;gap:5px">
+        <button class="b bgr" style="font-size:0.7rem;padding:4px 8px" onclick="equalizeTop2()">⚖️ Égaliser #1 & #2</button>
+        <button class="b bgr" style="font-size:0.7rem;padding:4px 8px" onclick="equalizeTop3()">⚖️ Égaliser Top 3</button>
+        <button class="b bgr" style="font-size:0.7rem;padding:4px 8px" onclick="swapTop2()">🔀 Inverser #1 & #2</button>
+        <button class="b br"  style="font-size:0.7rem;padding:4px 8px" onclick="resetCoins()">🧹 RAZ Pièces</button>
+      </div>
+      <div class="plist" id="plist"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── AUTENTIFICATION CLÉ ──────────────────────────────
+const urlParams = new URLSearchParams(window.location.search);
+const KEY = (urlParams.get('key') || localStorage.getItem('user_key') || '').toUpperCase();
+
+if (!KEY) { window.location.href = '/'; }
+document.getElementById('key-badge').textContent = `CLÉ: ${KEY}`;
+
+let cfUrl = null;
+
+// ── SSE PAR CLÉ ──────────────────────────────────────
+const es = new EventSource(`/events?key=${KEY}`);
+es.onmessage = e => {
+  try { render(JSON.parse(e.data)); } catch {}
+};
+es.onerror = () => {
+  // Clé invalide ou problème de connexion
+};
+
+function fmt(s) {
+  if (!s||isNaN(s)) s=0;
+  const m = Math.floor(s/60), sec = Math.floor(s%60);
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function render(s) {
+  if (s.cf_url && s.cf_url !== cfUrl) {
+    cfUrl = s.cf_url;
+    const el = document.getElementById('cf-url');
+    el.textContent = cfUrl;
+    el.classList.remove('cf-wait');
+  }
+
+  const d = document.getElementById('tik-dot'), t = document.getElementById('tik-txt');
+  d.className = 'dot ' + (s.tiktok==='on'?'g':s.tiktok==='connecting'?'o':'r');
+  t.textContent = s.tiktok==='on'?`Live @${s.tiktok_user}`:s.tiktok==='connecting'?'Connexion...':'TikTok OFF';
+
+  const sec = s.snipe_on ? s.snipe_rem : s.timer_rem;
+  const cn = document.getElementById('cn'), cl = document.getElementById('cl');
+  cn.textContent = fmt(sec);
+  cn.className = 'chrono-num' + (s.snipe_on?' snipe':s.timer_on&&s.timer_rem<s.snipe_dur?' warn':'');
+  cl.textContent = s.snipe_on?'🚨 SNIPE DELAY !':s.timer_on?'En cours...':s.timer_rem===0?'Terminé !':'En attente';
+
+  const c = s.color||'#ffd700';
+  const card = document.getElementById('pv-card');
+  card.style.borderColor = c; card.style.boxShadow = `0 0 28px ${c}35`;
+  document.getElementById('pv-top').style.borderColor = c;
+  document.getElementById('pv-coins').textContent = s.players.reduce((a,p)=>a+p.coins,0);
+
+  const minPill = document.getElementById('pv-min');
+  minPill.style.borderColor = c;
+  if (s.min_bid_enabled) {
+    minPill.style.display = 'flex';
+    minPill.innerHTML = `✅ MIN : <span class="hl">${s.min_bid_val||1}</span>🪙`;
+  } else {
+    minPill.style.display = 'none';
+  }
+
+  if (document.activeElement !== document.getElementById('min-mode') && document.activeElement !== document.getElementById('min-val-input')) {
+    document.getElementById('min-mode').value = s.min_bid_enabled ? 'min' : 'none';
+    document.getElementById('min-val-box').style.display = s.min_bid_enabled ? 'block' : 'none';
+    if (s.min_bid_val) document.getElementById('min-val-input').value = s.min_bid_val;
+  }
+  const sEl = document.getElementById('pv-snipe');
+  sEl.className = 'ov-pill snipe' + (s.snipe_on?' hot':'');
+  sEl.innerHTML = `🛡️ SNIPE <span class="hl">${s.snipe_on?Math.ceil(s.snipe_rem)+'S':Math.ceil(s.snipe_dur)+'S'}</span>`;
+  const pt = document.getElementById('pv-timer');
+  pt.textContent = fmt(sec);
+  pt.className = 'ov-timer' + (s.snipe_on?' snipe':s.timer_on&&s.timer_rem<s.snipe_dur?' warn':'');
+  document.getElementById('pv-tot').textContent = s.players.length;
+
+  const top3 = s.players.slice(0,3);
+  document.getElementById('pv-ranks').innerHTML = [0,1,2].map(i => {
+    const p = top3[i], cls=['r1','r2','r3'][i];
+    return p ? `<div class="rrow ${cls}">
+      <div class="rbadge">${i+1}</div>
+      <img class="rav" src="${p.av}" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
+      <div class="rname">${esc(p.name)}</div>
+      <div class="rcoins">${p.coins}<div class="ddots"><div class="dd"></div><div class="dd"></div></div></div>
+    </div>` :
+    `<div class="rrow" style="opacity:.25"><div class="rbadge">${i+1}</div><div class="rav"></div><div class="rname" style="color:#444">—</div></div>`;
+  }).join('');
+
+  const pl = document.getElementById('plist');
+  if (!s.players.length) {
+    pl.innerHTML = '<div class="empty">Aucun joueur pour l\'instant</div>';
+    return;
+  }
+
+  if (!document.activeElement || !document.activeElement.classList.contains('ci')) {
+    pl.innerHTML = s.players.map((p,i) => `
+      <div class="prow">
+        <span style="font-size:.65rem;color:var(--muted);width:14px;text-align:center">${i+1}</span>
+        <img class="pav" src="${p.av}" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
+        <div class="pinfo"><div class="pname">${esc(p.name)}</div><div class="pun">@${esc(p.u)}</div></div>
+        <span class="pcoins">${p.coins}🪙</span>
+        <button class="qb" onclick="delta('${p.u}',10)">+10</button>
+        <button class="qb" onclick="delta('${p.u}',100)">+100</button>
+        <button class="qb" onclick="delta('${p.u}',1000)">+1k</button>
+        <input class="ci" type="number" value="${p.coins}"
+          onchange="setC('${p.u}',this.value)"
+          onkeydown="if(event.key==='Enter'){setC('${p.u}',this.value);this.blur()}">
+        <button class="qb del" onclick="removeP('${p.u}')">✕</button>
+      </div>`).join('');
+  }
+}
+
+// ── ACTIONS API AVEC CLÉ ──────────────────────────────
+const api = (url, body) => fetch(url, {
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({...body, key: KEY})
+});
+
+function timer(action)   { api('/api/timer', {action}); }
+function setTimer()      { api('/api/timer', {action:'set', dur:+document.getElementById('c-dur').value||60, snipe:+document.getElementById('c-snipe').value||10}); }
+function setColor(c,el)  { document.querySelectorAll('.cd.on').forEach(d=>d.classList.remove('on')); if(el)el.classList.add('on'); api('/api/color',{color:c}); }
+function tikConnect()    { const u=document.getElementById('tt-user').value.trim(); if(u) api('/api/tiktok',{action:'connect',user:u}); }
+function tikDisconnect() { api('/api/tiktok',{action:'disconnect'}); }
+function addP()          { const u=document.getElementById('p-u').value.trim(); if(!u)return; const c=parseInt(document.getElementById('p-c').value)||0; api('/api/player',{action:'add',u,coins:c}); document.getElementById('p-u').value=''; document.getElementById('p-u').focus(); }
+function delta(u,v)      { api('/api/player',{action:'coins',u,mode:'delta',val:v}); }
+function setC(u,v)       { api('/api/player',{action:'coins',u,mode:'set',val:parseInt(v)||0}); }
+function removeP(u)      { if(confirm(`Retirer @${u} ?`)) api('/api/player',{action:'remove',u}); }
+function clearAll()      { if(confirm('Effacer tous les joueurs ?')) api('/api/player',{action:'clear'}); }
+function equalizeTop2()  { api('/api/player', {action:'equalize_top2'}); }
+function equalizeTop3()  { api('/api/player', {action:'equalize_top3'}); }
+function swapTop2()      { api('/api/player', {action:'swap_top2'}); }
+function updateMinConfig() {
+  const mode = document.getElementById('min-mode').value;
+  const val = parseInt(document.getElementById('min-val-input').value) || 1;
+  document.getElementById('min-val-box').style.display = mode === 'min' ? 'block' : 'none';
+  api('/api/config', {
+    min_bid_enabled: mode === 'min',
+    min_bid_val: val
+  });
+}
+
+function copyCf() {
+  if (!cfUrl) return;
+  navigator.clipboard.writeText(cfUrl).then(()=>toast('✅ Lien copié !'));
+}
+function copyOv() {
+  const base = cfUrl || window.location.origin;
+  const ovLink = `${base}/overlay?key=${KEY}`;
+  navigator.clipboard.writeText(ovLink).then(()=>toast('📺 Lien Overlay personnalisé copié !'));
+}
+function logout() {
+  localStorage.removeItem('user_key');
+  window.location.href = '/';
+}
+
+function toast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block';
+  setTimeout(()=>t.style.display='none',2500);
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
