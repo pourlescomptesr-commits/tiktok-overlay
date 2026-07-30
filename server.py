@@ -357,12 +357,13 @@ def api_color():
     push_key(key)
     return jsonify(ok=True)
 
-def stop_tiktok_for_key(key):
+TIKTOK_WORKERS = {}
+
+def stop_tiktok_worker_for_key(key):
     with LOCK:
-        info = TIKTOK_THREADS.pop(key, None)
-    if info:
-        try:
-            asyncio.run_coroutine_threadsafe(info["client"].disconnect(), info["loop"])
+        p = TIKTOK_WORKERS.pop(key, None)
+    if p:
+        try: p.kill()
         except: pass
 
 @app.route('/api/tiktok', methods=['POST'])
@@ -370,22 +371,63 @@ def api_tiktok():
     key = get_key_from_req()
     if not key: return jsonify(ok=False, error="Clé non autorisée"), 401
     s = get_or_create_state(key)
-    a = request.json.get('action')
+    a = (request.json or {}).get('action')
     if a == 'connect':
-        u = request.json.get('user','').lstrip('@')
+        u = (request.json or {}).get('user','').strip().lstrip('@')
         if not u: return jsonify(ok=False)
-        stop_tiktok_for_key(key)
+        stop_tiktok_worker_for_key(key)
         with LOCK:
             s["tiktok"] = "connecting"
             s["tiktok_user"] = u
         push_key(key)
-        threading.Thread(target=run_tiktok_for_key, args=(key, u), daemon=True).start()
+        port = str(os.environ.get('PORT', 3000))
+        p = subprocess.Popen([sys.executable, os.path.join(BASE_DIR, 'tiktok_worker.py'), key, u, port])
+        with LOCK:
+            TIKTOK_WORKERS[key] = p
     elif a == 'disconnect':
-        stop_tiktok_for_key(key)
+        stop_tiktok_worker_for_key(key)
         with LOCK:
             s["tiktok"] = "off"
             s["tiktok_user"] = ""
         push_key(key)
+    return jsonify(ok=True)
+
+@app.route('/api/internal/tiktok_status', methods=['POST'])
+def api_internal_tiktok_status():
+    d = request.json or {}
+    key = d.get('key')
+    if not key: return jsonify(ok=False)
+    with LOCK:
+        s = get_or_create_state(key)
+        s["tiktok"] = d.get('status', 'off')
+        s["tiktok_user"] = d.get('user', '')
+    push_key(key)
+    return jsonify(ok=True)
+
+@app.route('/api/internal/gift', methods=['POST'])
+def api_internal_gift():
+    d = request.json or {}
+    key = d.get('key')
+    if not key: return jsonify(ok=False)
+    u = d.get('u','')
+    if not u: return jsonify(ok=False)
+    nick = d.get('nick', u)
+    av = d.get('av', '')
+    total_coins = int(d.get('coins', 1))
+    with LOCK:
+        s = get_or_create_state(key)
+        found = False
+        for p in s["players"]:
+            if p["u"].lower() == u.lower():
+                p["coins"] += total_coins
+                p["name"] = nick
+                found = True
+                break
+        if not found:
+            s["players"].append({"u": u, "name": nick, "av": av, "coins": total_coins})
+        s["players"].sort(key=lambda x: x["coins"], reverse=True)
+        trigger_snipe_key(s)
+    push_key(key)
     return jsonify(ok=True)
 
 @app.route('/api/player', methods=['POST'])
