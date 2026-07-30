@@ -390,7 +390,7 @@ function render(s) {
             <input class="ci" type="number" value="${p.coins}"
               onchange="setC('${p.u}',this.value)"
               onkeydown="if(event.key==='Enter'){setC('${p.u}',this.value);this.blur()}">
-            <button class="qb del" onclick="removeP('${p.u}')">✕</button>
+            <button class="qb del" onclick="removeP(${i}, '${esc(p.u)}')">✕</button>
           </div>`).join('');
       }
     }
@@ -412,7 +412,7 @@ function tikDisconnect() { api('/api/tiktok',{action:'disconnect'}); }
 function addP()          { lastPlayersSig = ''; const u=document.getElementById('p-u').value.trim(); if(!u)return; const c=parseInt(document.getElementById('p-c').value)||0; api('/api/player',{action:'add',u,coins:c}); document.getElementById('p-u').value=''; document.getElementById('p-u').focus(); }
 function delta(u,v)      { lastPlayersSig = ''; api('/api/player',{action:'coins',u,mode:'delta',val:v}); }
 function setC(u,v)       { lastPlayersSig = ''; api('/api/player',{action:'coins',u,mode:'set',val:parseInt(v)||0}); }
-function removeP(u)      { lastPlayersSig = ''; api('/api/player',{action:'remove',u}); }
+function removeP(idx,u)  { lastPlayersSig = ''; api('/api/player',{action:'remove',idx:idx,u:u}); }
 function clearAll()      { lastPlayersSig = ''; api('/api/player',{action:'clear'}); }
 function equalizeTop2()  { lastPlayersSig = ''; api('/api/player', {action:'equalize_top2'}); }
 function equalizeTop3()  { lastPlayersSig = ''; api('/api/player', {action:'equalize_top3'}); }
