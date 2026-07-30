@@ -357,14 +357,111 @@ def api_color():
     push_key(key)
     return jsonify(ok=True)
 
-TIKTOK_WORKERS = {}
+TIKTOK_THREADS = {}
 
-def stop_tiktok_worker_for_key(key):
+def stop_tiktok_for_key(key):
     with LOCK:
-        p = TIKTOK_WORKERS.pop(key, None)
-    if p:
-        try: p.kill()
+        info = TIKTOK_THREADS.pop(key, None)
+    if info:
+        try:
+            asyncio.run_coroutine_threadsafe(info["client"].disconnect(), info["loop"])
         except: pass
+
+def run_tiktok_worker_thread(key, username):
+    with LOCK:
+        s = get_or_create_state(key)
+        s["tiktok"] = "connecting"
+        s["tiktok_user"] = username
+    push_key(key)
+
+    try:
+        from TikTokLive import TikTokLiveClient
+        from TikTokLive.events import GiftEvent, ConnectEvent, DisconnectEvent
+        from TikTokLive.client.web.routes.fetch_signed_websocket import WebcastPlatform
+
+        platforms = [WebcastPlatform.WEB, WebcastPlatform.MOBILE]
+
+        for platform in platforms:
+            try:
+                print(f"[TikTok Thread] Connexion @{username} via {platform.name}...", flush=True)
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+                client = TikTokLiveClient(unique_id=username, platform=platform)
+                client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+
+                with LOCK:
+                    TIKTOK_THREADS[key] = {"loop": loop, "client": client}
+
+                @client.on(ConnectEvent)
+                async def on_connect(e):
+                    print(f"[TikTok Thread] CONNECTÉ À @{username} !", flush=True)
+                    with LOCK:
+                        s["tiktok"] = "on"
+                        s["tiktok_user"] = username
+                    push_key(key)
+
+                @client.on(DisconnectEvent)
+                async def on_disconnect(e):
+                    print(f"[TikTok Thread] Déconnecté de @{username}", flush=True)
+                    with LOCK:
+                        s["tiktok"] = "off"
+                        s["tiktok_user"] = ""
+                    push_key(key)
+
+                @client.on(GiftEvent)
+                async def on_gift(e):
+                    try:
+                        u = getattr(e.user, 'unique_id', '') or getattr(e.user, 'username', '')
+                        if not u: return
+                        nick = getattr(e.user, 'nickname', u) or u
+
+                        diamonds = getattr(e.gift, 'diamond_count', 0) or getattr(e.gift, 'coins', 0) or getattr(e.gift, 'value', 0)
+                        if diamonds <= 0: diamonds = 1
+                        repeat = getattr(e.gift, 'repeat_count', 1) or getattr(e.gift, 'count', 1) or 1
+
+                        if getattr(e.gift, 'streakable', False) and not getattr(e.gift, 'repeat_end', True):
+                            return
+
+                        total_coins = max(1, int(diamonds) * int(repeat))
+
+                        try:
+                            urls = getattr(e.user.avatar, 'urls', [])
+                            av = urls[0] if urls else f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+                        except:
+                            av = f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
+
+                        print(f"[TikTok Gift] @{u} ({nick}) -> +{total_coins} 🪙", flush=True)
+
+                        with LOCK:
+                            found = False
+                            for p in s["players"]:
+                                if p["u"].lower() == u.lower():
+                                    p["coins"] += total_coins
+                                    p["name"] = nick
+                                    found = True
+                                    break
+                            if not found:
+                                s["players"].append({"u": u, "name": nick, "av": av, "coins": total_coins})
+                            s["players"].sort(key=lambda x: x["coins"], reverse=True)
+                            trigger_snipe_key(s)
+                        push_key(key)
+                    except Exception as gift_err:
+                        print(f"[TikTok Gift Error] {gift_err}", flush=True)
+
+                loop.run_until_complete(client.start())
+                break
+            except Exception as ex:
+                print(f"[TikTok Thread Err {platform.name} @{username}] {ex}", flush=True)
+                time.sleep(2)
+    except Exception as ex_top:
+        print(f"[TikTok Thread Top Error @{username}] {ex_top}", flush=True)
+    finally:
+        with LOCK:
+            s = get_or_create_state(key)
+            s["tiktok"] = "off"
+            s["tiktok_user"] = ""
+        push_key(key)
 
 @app.route('/api/tiktok', methods=['POST'])
 def api_tiktok():
@@ -375,59 +472,14 @@ def api_tiktok():
     if a == 'connect':
         u = (request.json or {}).get('user','').strip().lstrip('@')
         if not u: return jsonify(ok=False)
-        stop_tiktok_worker_for_key(key)
-        with LOCK:
-            s["tiktok"] = "connecting"
-            s["tiktok_user"] = u
-        push_key(key)
-        port = str(os.environ.get('PORT', 3000))
-        p = subprocess.Popen([sys.executable, os.path.join(BASE_DIR, 'tiktok_worker.py'), key, u, port])
-        with LOCK:
-            TIKTOK_WORKERS[key] = p
+        stop_tiktok_for_key(key)
+        threading.Thread(target=run_tiktok_worker_thread, args=(key, u), daemon=True).start()
     elif a == 'disconnect':
-        stop_tiktok_worker_for_key(key)
+        stop_tiktok_for_key(key)
         with LOCK:
             s["tiktok"] = "off"
             s["tiktok_user"] = ""
         push_key(key)
-    return jsonify(ok=True)
-
-@app.route('/api/internal/tiktok_status', methods=['POST'])
-def api_internal_tiktok_status():
-    d = request.json or {}
-    key = d.get('key')
-    if not key: return jsonify(ok=False)
-    with LOCK:
-        s = get_or_create_state(key)
-        s["tiktok"] = d.get('status', 'off')
-        s["tiktok_user"] = d.get('user', '')
-    push_key(key)
-    return jsonify(ok=True)
-
-@app.route('/api/internal/gift', methods=['POST'])
-def api_internal_gift():
-    d = request.json or {}
-    key = d.get('key')
-    if not key: return jsonify(ok=False)
-    u = d.get('u','')
-    if not u: return jsonify(ok=False)
-    nick = d.get('nick', u)
-    av = d.get('av', '')
-    total_coins = int(d.get('coins', 1))
-    with LOCK:
-        s = get_or_create_state(key)
-        found = False
-        for p in s["players"]:
-            if p["u"].lower() == u.lower():
-                p["coins"] += total_coins
-                p["name"] = nick
-                found = True
-                break
-        if not found:
-            s["players"].append({"u": u, "name": nick, "av": av, "coins": total_coins})
-        s["players"].sort(key=lambda x: x["coins"], reverse=True)
-        trigger_snipe_key(s)
-    push_key(key)
     return jsonify(ok=True)
 
 @app.route('/api/player', methods=['POST'])
