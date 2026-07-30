@@ -228,19 +228,27 @@ def fetch_profile(u):
 # ─── ROUTES CLIENT (HTML) ─────────────────────────────
 @app.route('/')
 def route_login():
-    return send_from_directory(PUBLIC, 'login.html')
+    r = send_from_directory(PUBLIC, 'login.html')
+    r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return r
 
 @app.route('/panel')
 def route_panel():
-    return send_from_directory(PUBLIC, 'panel.html')
+    r = send_from_directory(PUBLIC, 'panel.html')
+    r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return r
 
 @app.route('/overlay')
 def route_overlay():
-    return send_from_directory(PUBLIC, 'overlay.html')
+    r = send_from_directory(PUBLIC, 'overlay.html')
+    r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return r
 
 @app.route('/admin')
 def route_admin():
-    return send_from_directory(PUBLIC, 'admin.html')
+    r = send_from_directory(PUBLIC, 'admin.html')
+    r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return r
 
 # ─── API AUTH & VERIFICATION DE CLÉ ──────────────────
 @app.route('/api/key/verify', methods=['POST'])
