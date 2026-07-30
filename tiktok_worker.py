@@ -64,7 +64,7 @@ try:
         except Exception as gift_err:
             print(f"[TikTok Worker Gift Err] {gift_err}", flush=True)
 
-    client.start()
+    asyncio.run(client.start())
 except Exception as ex:
     print(f"[TikTok Worker Error @{username}] {ex}", flush=True)
 finally:
