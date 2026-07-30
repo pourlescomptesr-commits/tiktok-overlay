@@ -69,12 +69,15 @@ PUBLIC_CF_URL = None
 # ─── THREAD CHRONO GLOBAL (gère toutes les clés) ───────
 def global_timer_loop():
     t = time.time()
+    counter = 0
     while True:
         time.sleep(0.5)
         now = time.time(); dt = now - t; t = now
+        counter += 1
         with LOCK:
             keys_to_push = []
             for key, s in STATES.items():
+                changed = False
                 if s["timer_on"]:
                     s["timer_rem"] = max(0.0, s["timer_rem"] - dt)
                     if s["timer_rem"] == 0:
@@ -82,12 +85,15 @@ def global_timer_loop():
                         if s["snipe_dur"] > 0:
                             s["snipe_on"] = True
                             s["snipe_rem"] = s["snipe_dur"]
-                        keys_to_push.append(key)
+                    changed = True
                 elif s["snipe_on"]:
                     s["snipe_rem"] = max(0.0, s["snipe_rem"] - dt)
                     if s["snipe_rem"] == 0:
                         s["snipe_on"] = False
-                        keys_to_push.append(key)
+                    changed = True
+
+                if changed and (counter % 2 == 0 or s["timer_rem"] == 0 or s["snipe_rem"] == 0):
+                    keys_to_push.append(key)
         for k in keys_to_push:
             push_key(k)
 
@@ -293,9 +299,11 @@ def events():
 
 # ─── API CONTRÔLE PANEL PER KEY ───────────────────────
 def get_key_from_req():
-    key = (request.json or {}).get('key', '').strip().upper()
+    raw_key = (request.json or {}).get('key') or request.args.get('key') or request.headers.get('X-Key')
+    if not raw_key: return None
+    key = str(raw_key).strip().upper().replace(' ', '')
     keys = load_keys()
-    if key and key in keys and keys[key].get('active'):
+    if key in keys and keys[key].get('active'):
         return key
     return None
 
