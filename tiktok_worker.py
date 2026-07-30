@@ -25,6 +25,7 @@ for attempt in range(1, 6):
     try:
         print(f"[TikTok Worker] Tentative {attempt}/5 pour @{username}...", flush=True)
         client = TikTokLiveClient(unique_id=username)
+        client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
         @client.on(ConnectEvent)
         async def on_connect(e):
