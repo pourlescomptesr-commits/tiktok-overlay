@@ -3,235 +3,355 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Connexion SaaS — TikTok Auction Live Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<title>TikTok Auction Live Pro — Access Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #07080f;
-  --surface: rgba(13, 14, 24, 0.95);
-  --border: rgba(255, 215, 0, 0.18);
+  --bg: #030408;
   --gold: #ffd700;
   --pink: #ff007f;
-  --purple: #9c27b0;
-  --text: #e8eaf6;
-  --muted: rgba(255, 255, 255, 0.4);
+  --cyan: #00f3ff;
+  --purple: #9d00ff;
+  --card-bg: rgba(10, 12, 24, 0.78);
+  --border: rgba(255, 215, 0, 0.2);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Outfit', sans-serif;
   background: var(--bg);
-  color: var(--text);
+  color: #fff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow: hidden;
+  position: relative;
+  cursor: default;
 }
 
-.bg-orb {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.15;
+#canvas-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
   pointer-events: none;
 }
-.orb1 { width: 550px; height: 550px; background: var(--gold); top: -200px; left: -200px; animation: float 14s ease infinite; }
-.orb2 { width: 450px; height: 450px; background: var(--pink); bottom: -150px; right: -150px; animation: float 10s ease infinite reverse; }
-@keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.05); } }
+
+.custom-cursor {
+  width: 24px; height: 24px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.08s ease, width 0.2s, height 0.2s, background-color 0.2s;
+  box-shadow: 0 0 15px var(--gold), inset 0 0 10px var(--pink);
+  mix-blend-mode: screen;
+}
+.custom-cursor-dot {
+  width: 6px; height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px #fff;
+}
+
+.grid-overlay {
+  position: absolute; inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.7;
+}
 
 .topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 36px;
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 45px;
+  background: rgba(3, 4, 8, 0.6);
+  backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(7, 8, 15, 0.85);
-  backdrop-filter: blur(16px);
-  position: relative;
-  z-index: 10;
 }
 .logo {
-  font-size: 1.15rem;
-  font-weight: 900;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  background: linear-gradient(90deg, var(--pink), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-size: 1.25rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase;
+  background: linear-gradient(90deg, var(--cyan), var(--pink), var(--gold));
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: shine 4s linear infinite;
+  display: flex; align-items: center; gap: 10px;
 }
-.status-pill {
-  padding: 6px 14px;
-  background: rgba(57, 255, 20, 0.1);
-  border: 1px solid rgba(57, 255, 20, 0.3);
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: #39ff14;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.dot { width: 7px; height: 7px; border-radius: 50%; background: #39ff14; box-shadow: 0 0 8px #39ff14; }
+@keyframes shine { to { background-position: 200% center; } }
 
-.center-box {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 50px 20px;
-  position: relative;
-  z-index: 1;
+.ping-pill {
+  padding: 8px 18px;
+  background: rgba(0, 243, 255, 0.08);
+  border: 1px solid rgba(0, 243, 255, 0.3);
+  border-radius: 30px;
+  font-size: 0.8rem; font-weight: 800; color: var(--cyan);
+  display: flex; align-items: center; gap: 8px;
+  letter-spacing: 1px;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+}
+.ping-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); animation: pulse 1.2s infinite alternate; }
+@keyframes pulse { from { opacity: 0.3; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+.center-container {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 10; padding: 20px;
+}
+
+.tilt-card-wrapper {
+  perspective: 1000px;
+  width: 100%; max-width: 460px;
 }
 
 .card {
-  width: 100%;
-  max-width: 440px;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 28px;
-  padding: 48px 40px;
-  box-shadow: 0 50px 120px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 215, 0, 0.05);
-  backdrop-filter: blur(24px);
-  text-align: center;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-.card:hover {
-  border-color: rgba(255, 215, 0, 0.35);
-  box-shadow: 0 50px 120px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.1);
+  background: var(--card-bg);
+  border-radius: 32px;
+  padding: 50px 42px;
+  backdrop-filter: blur(30px);
+  position: relative;
+  box-shadow: 0 30px 100px rgba(0,0,0,0.8), 0 0 50px rgba(0, 243, 255, 0.1);
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+  overflow: hidden;
 }
 
-.badge-icon {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 20px auto;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 0, 127, 0.15));
-  border: 1.5px solid rgba(255, 215, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.15);
+.card::before {
+  content: ''; position: absolute; inset: -2px; border-radius: 34px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--gold), var(--pink), var(--cyan), var(--purple));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: borderRotate 6s linear infinite;
+  background-size: 300% 300%;
+}
+@keyframes borderRotate { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+.icon-glow {
+  width: 84px; height: 84px; margin: 0 auto 24px auto;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,0,127,0.2));
+  border: 1.5px solid rgba(255, 215, 0, 0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.6rem;
+  box-shadow: 0 0 35px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 0, 127, 0.3);
+  transform: translateZ(30px);
 }
 
 .title {
-  font-size: 1.8rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  background: linear-gradient(135deg, var(--gold), #ff9900);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 6px;
+  font-size: 2rem; font-weight: 900; letter-spacing: 1px;
+  background: linear-gradient(135deg, var(--gold), #fff, var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 8px; text-transform: uppercase;
+  transform: translateZ(25px);
 }
 .sub {
-  font-size: 0.82rem;
-  color: var(--muted);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: 36px;
-  font-weight: 700;
+  font-size: 0.85rem; color: rgba(255, 255, 255, 0.5); font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 38px;
+  transform: translateZ(20px);
 }
 
-.field-group { text-align: left; margin-bottom: 20px; }
-.label {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 8px;
-  display: block;
+.field { text-align: left; margin-bottom: 24px; transform: translateZ(15px); }
+.field label {
+  font-size: 0.75rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6); margin-bottom: 10px; display: block;
 }
+
+.input-wrap { position: relative; }
 .input {
-  width: 100%;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  color: #fff;
-  font-family: 'Outfit', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-align: center;
-  outline: none;
-  transition: all 0.2s;
+  width: 100%; padding: 18px 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px; color: #fff;
+  font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; font-weight: 700;
+  letter-spacing: 3px; text-align: center; outline: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .input:focus {
-  border-color: var(--gold);
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+  border-color: var(--cyan);
+  background: rgba(0, 243, 255, 0.06);
+  box-shadow: 0 0 30px rgba(0, 243, 255, 0.25);
 }
-.input::placeholder { color: rgba(255, 255, 255, 0.2); letter-spacing: 1px; font-weight: 400; font-size: 0.9rem; }
+.input::placeholder { color: rgba(255, 255, 255, 0.2); font-family: 'Outfit'; font-size: 0.95rem; letter-spacing: 1px; }
 
-.btn-submit {
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(135deg, var(--gold), #ff9900);
-  border: none;
-  border-radius: 14px;
-  color: #000;
-  font-family: 'Outfit', sans-serif;
-  font-weight: 900;
-  font-size: 0.95rem;
-  letter-spacing: 1px;
-  cursor: pointer;
-  box-shadow: 0 6px 30px rgba(255, 153, 0, 0.35);
-  transition: transform 0.15s, box-shadow 0.15s;
+.btn-cyber {
+  width: 100%; padding: 18px;
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  border: none; border-radius: 16px; color: #000;
+  font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1rem;
+  letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+  box-shadow: 0 10px 40px rgba(255, 0, 127, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(20px);
 }
-.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(255, 153, 0, 0.5); }
-.btn-submit:active { transform: none; }
-.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-cyber:hover {
+  transform: translateZ(30px) translateY(-2px);
+  box-shadow: 0 15px 50px rgba(255, 0, 127, 0.6), 0 0 30px var(--gold);
+}
+.btn-cyber:active { transform: translateZ(15px); }
 
 .err {
-  margin-top: 16px;
-  padding: 12px 18px;
-  background: rgba(255, 59, 92, 0.12);
-  border: 1px solid rgba(255, 59, 92, 0.35);
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: #ff3b5c;
-  display: none;
+  margin-top: 18px; padding: 14px 20px;
+  background: rgba(255, 59, 92, 0.15); border: 1px solid rgba(255, 59, 92, 0.4);
+  border-radius: 14px; font-size: 0.88rem; font-weight: 800; color: #ff3b5c;
+  display: none; transform: translateZ(10px);
 }
-.err.show { display: block; }
+.err.show { display: block; animation: shake 0.4s ease; }
+@keyframes shake { 0%,100%{transform:translateZ(10px) translateX(0)} 25%{transform:translateZ(10px) translateX(-6px)} 75%{transform:translateZ(10px) translateX(6px)} }
 </style>
 </head>
 <body>
-<div class="bg-orb orb1"></div>
-<div class="bg-orb orb2"></div>
+
+<canvas id="canvas-bg"></canvas>
+<div class="grid-overlay"></div>
+<div class="custom-cursor" id="cursor"></div>
+<div class="custom-cursor-dot" id="cursor-dot"></div>
 
 <div class="topbar">
-  <div class="logo">🎯 TikTok Auction Live Pro</div>
-  <div class="status-pill"><div class="dot"></div>Serveur En Ligne</div>
+  <div class="logo">🎯 TikTok Auction Pro</div>
+  <div class="ping-pill"><div class="ping-dot"></div>CLOUDFLARE 12ms</div>
 </div>
 
-<div class="center-box">
-  <div class="card">
-    <div class="badge-icon">🎟️</div>
-    <div class="title">Accès au Panel</div>
-    <div class="sub">Entrez votre clé d'accès Streamer</div>
+<div class="center-container">
+  <div class="tilt-card-wrapper" id="card-wrapper">
+    <div class="card" id="card">
+      <div class="icon-glow">👑</div>
+      <div class="title">Command Portal</div>
+      <div class="sub">Authentification Streamer Pro</div>
 
-    <div class="field-group">
-      <label class="label">🔑 Clé d'accès unique</label>
-      <input class="input" id="key-input" type="text" placeholder="EX: DEMO1234" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter')login()">
+      <div class="field">
+        <label>🔑 Clé d'accès Streamer</label>
+        <div class="input-wrap">
+          <input class="input" id="key-input" type="text" placeholder="EX: KEY-AA860585" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter')login()">
+        </div>
+      </div>
+
+      <button class="btn-cyber" id="btn" onclick="login()">Se Connecter Au Panel →</button>
+      <div class="err" id="err">❌ Clé d'accès invalide ou désactivée</div>
     </div>
-
-    <button class="btn-submit" id="btn" onclick="login()">Se Connecter au Panel →</button>
-    <div class="err" id="err">❌ Clé invalide ou expirée</div>
   </div>
 </div>
 
 <script>
+const canvas = document.getElementById('canvas-bg');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+});
+
+const particles = [];
+const mouse = { x: width/2, y: height/2 };
+
+class Particle {
+  constructor(x, y) {
+    this.x = x || Math.random() * width;
+    this.y = y || Math.random() * height;
+    this.size = Math.random() * 2.5 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 1.5;
+    this.speedY = (Math.random() - 0.5) * 1.5;
+    this.color = ['#ffd700', '#ff007f', '#00f3ff', '#9d00ff'][Math.floor(Math.random()*4)];
+    this.alpha = Math.random() * 0.8 + 0.2;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x < 0 || this.x > width) this.speedX *= -1;
+    if (this.y < 0 || this.y > height) this.speedY *= -1;
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+for (let i = 0; i < 70; i++) particles.push(new Particle());
+
+function animateParticles() {
+  ctx.clearRect(0, 0, width, height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.save();
+        ctx.globalAlpha = (1 - dist / 120) * 0.15;
+        ctx.strokeStyle = '#00f3ff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursor-dot');
+const cardWrapper = document.getElementById('card-wrapper');
+const card = document.getElementById('card');
+
+window.addEventListener('mousemove', (e) => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+  cursorDot.style.left = e.clientX + 'px';
+  cursorDot.style.top = e.clientY + 'px';
+
+  if (Math.random() > 0.4) {
+    const p = new Particle(e.clientX, e.clientY);
+    p.speedX = (Math.random() - 0.5) * 3;
+    p.speedY = (Math.random() - 0.5) * 3;
+    particles.push(p);
+    if (particles.length > 120) particles.shift();
+  }
+
+  const rect = cardWrapper.getBoundingClientRect();
+  const cardX = rect.left + rect.width / 2;
+  const cardY = rect.top + rect.height / 2;
+  const rotX = (e.clientY - cardY) / 20;
+  const rotY = -(e.clientX - cardX) / 20;
+  card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+});
+
+cardWrapper.addEventListener('mouseleave', () => {
+  card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+});
+
 async function login() {
   const k = document.getElementById('key-input').value.trim().toUpperCase();
   if (!k) return;
   const btn = document.getElementById('btn');
   const err = document.getElementById('err');
-  btn.disabled = true; btn.textContent = 'Vérification en cours...';
+  btn.disabled = true; btn.textContent = 'Authentification...';
   err.classList.remove('show');
   try {
     const r = await fetch('/api/key/verify', {
@@ -244,14 +364,14 @@ async function login() {
       localStorage.setItem('user_key', k);
       window.location.href = `/panel?key=${k}`;
     } else {
-      err.textContent = '❌ ' + (d.error || 'Clé invalide');
+      err.textContent = '❌ ' + (d.error || 'Clé d\'accès invalide');
       err.classList.add('show');
-      btn.disabled = false; btn.textContent = 'Se Connecter au Panel →';
+      btn.disabled = false; btn.textContent = 'Se Connecter Au Panel →';
     }
   } catch {
-    err.textContent = '❌ Erreur de connexion serveur';
+    err.textContent = '❌ Erreur de réponse serveur';
     err.classList.add('show');
-    btn.disabled = false; btn.textContent = 'Se Connecter au Panel →';
+    btn.disabled = false; btn.textContent = 'Se Connecter Au Panel →';
   }
 }
 </script>
