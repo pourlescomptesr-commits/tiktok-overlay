@@ -2,103 +2,260 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Panneau de Contrôle — TikTok Auction Live</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panneau de Contrôle Pro — TikTok Auction Live</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#07080f;--surface:rgba(13,14,24,0.92);--border:rgba(255,255,255,0.08);
-  --gold:#ffd700;--pink:#ff007f;--muted:rgba(255,255,255,0.38);
+:root {
+  --bg: #07080f;
+  --surface: rgba(13, 14, 24, 0.95);
+  --border: rgba(255, 255, 255, 0.08);
+  --gold: #ffd700;
+  --pink: #ff007f;
+  --purple: #9c27b0;
+  --muted: rgba(255, 255, 255, 0.4);
+  --green: #39ff14;
+  --red: #ff3b5c;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:#e8eaf6;min-height:100vh;display:flex;flex-direction:column}
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;padding:12px 24px;
-  border-bottom:1px solid var(--border);background:rgba(7,8,15,0.95);backdrop-filter:blur(10px);
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: #e8eaf6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-.logo{font-size:.9rem;font-weight:900;letter-spacing:2px;text-transform:uppercase;
-  background:linear-gradient(90deg,var(--pink),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.kbadge{padding:4px 12px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:20px;font-size:0.75rem;font-weight:800;color:var(--gold)}
-.b{padding:7px 14px;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px}
-.b:hover{transform:translateY(-1px)}.b:active{transform:none}
-.bg{background:linear-gradient(135deg,#ffd700,#ff9900);color:#000}
-.bp{background:linear-gradient(135deg,#ff007f,#9c27b0);color:#fff}
-.br{background:linear-gradient(135deg,#ff3b5c,#ff007f);color:#fff}
-.bb{background:linear-gradient(135deg,#00bcd4,#00e676);color:#000}
-.bgr{background:rgba(255,255,255,0.06);color:#ccc;border:1px solid var(--border)}
-.bgr:hover{background:rgba(255,255,255,0.12);color:#fff}
 
-.layout{display:flex;flex:1;gap:20px;padding:20px;max-width:1400px;margin:0 auto;width:100%}
-.left{width:360px;flex-shrink:0;display:flex;flex-direction:column;gap:14px}
-.right{flex:1;display:flex;flex-direction:column;gap:14px}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7, 8, 15, 0.95);
+  backdrop-filter: blur(16px);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.logo-group { display: flex; align-items: center; gap: 14px; }
+.logo {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--pink), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.kbadge {
+  padding: 5px 14px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1.5px solid rgba(255, 215, 0, 0.35);
+  border-radius: 20px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--gold);
+}
 
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px}
-.stitle{font-size:0.7rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.tt-status-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.tt-status-badge.on { background: rgba(57, 255, 20, 0.12); border-color: rgba(57, 255, 20, 0.4); color: var(--green); }
+.tt-status-badge.off { background: rgba(255, 59, 92, 0.12); border-color: rgba(255, 59, 92, 0.35); color: var(--red); }
+.tt-status-badge.connecting { background: rgba(255, 170, 0, 0.12); border-color: rgba(255, 170, 0, 0.4); color: #ffaa00; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+.dot.pulse { animation: pulse 1s infinite alternate; }
+@keyframes pulse { from { opacity: 0.3; } to { opacity: 1; } }
 
-.chrono-box{text-align:center;padding:16px;background:rgba(0,0,0,0.4);border-radius:12px;border:1px solid var(--border)}
-.chrono-num{font-family:'Share Tech Mono',monospace;font-size:3rem;font-weight:700;color:#39ff14;line-height:1;text-shadow:0 0 20px rgba(57,255,20,0.4)}
-.chrono-num.warn{color:#ffaa00;text-shadow:0 0 20px rgba(255,170,0,0.5)}
-.chrono-num.snipe{color:#ff3b5c;text-shadow:0 0 20px rgba(255,59,92,0.8);animation:blink .8s ease infinite alternate}
-@keyframes blink{from{opacity:1}to{opacity:.4}}
+.top-actions { display: flex; align-items: center; gap: 10px; }
 
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.f{display:flex;flex-direction:column;gap:4px}
-.f label{font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-.f input,.f select{padding:9px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;outline:none}
-.f input:focus,.f select:focus{border-color:var(--gold)}
+.b {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.b:hover { transform: translateY(-1px); }
+.b:active { transform: none; }
+.bg { background: linear-gradient(135deg, #ffd700, #ff9900); color: #000; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.25); }
+.bp { background: linear-gradient(135deg, #ff007f, #9c27b0); color: #fff; }
+.br { background: linear-gradient(135deg, #ff3b5c, #ff007f); color: #fff; box-shadow: 0 4px 15px rgba(255, 59, 92, 0.3); }
+.bb { background: linear-gradient(135deg, #00bcd4, #00e676); color: #000; box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3); }
+.bgr { background: rgba(255, 255, 255, 0.06); color: #ccc; border: 1px solid var(--border); }
+.bgr:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 
-.crow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.cd{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform 0.15s}
-.cd:hover{transform:scale(1.2)}.cd.on{border-color:#fff;box-shadow:0 0 8px #fff}
+.layout { display: flex; flex: 1; gap: 22px; padding: 24px; max-width: 1440px; margin: 0 auto; width: 100%; }
+.left { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
+.right { flex: 1; display: flex; flex-direction: column; gap: 16px; }
 
-.preview{display:flex;align-items:center;justify-content:center;min-height:260px;background:rgba(0,0,0,0.4);border-radius:16px;border:1px dashed rgba(255,255,255,0.1);position:relative;overflow:hidden}
-.ov-card{width:290px;background:rgba(7,8,15,.95);border:2.5px solid #ffd700;border-radius:18px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:9px;box-shadow:0 0 30px rgba(255,215,0,.25);transition:border-color .3s,box-shadow .3s}
-.ov-top{background:rgba(0,0,0,.85);border:1.5px solid #ffd700;border-radius:30px;padding:4px 16px;font-size:.78rem;font-weight:800;display:flex;align-items:center;gap:6px;letter-spacing:1px}
-.ov-mid{display:flex;gap:6px;width:100%;justify-content:center}
-.ov-pill{background:rgba(0,0,0,.85);border-radius:30px;padding:3px 11px;font-size:.65rem;font-weight:800;display:flex;align-items:center;gap:4px}
-.ov-pill.min{border:1.5px solid #ffd700}.ov-pill.snipe{border:1.5px solid rgba(255,255,255,.15)}.ov-pill.snipe.hot{border-color:#ff3b5c;box-shadow:0 0 12px rgba(255,59,92,0.6)}
-.ov-pill .hl{color:#ffd700}.ov-pill.snipe .hl{background:rgba(255,255,255,.1);padding:1px 4px;border-radius:4px;font-size:.62rem}.ov-pill.snipe.hot .hl{background:#ff3b5c;color:#fff}
-.ov-timer{font-family:'Share Tech Mono',monospace;font-size:2.8rem;color:#39ff14;text-shadow:0 0 14px rgba(57,255,20,.55);line-height:1}
-.ov-timer.warn{color:#ffaa00}.ov-timer.snipe{color:#ff3b5c;text-shadow:0 0 20px rgba(255,59,92,0.8);animation:blink .8s ease infinite alternate}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+.stitle {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-.ranks{width:100%;display:flex;flex-direction:column;gap:6px}
-.rrow{background:rgba(0,0,0,.68);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:6px 10px;display:flex;align-items:center;gap:8px;height:42px}
-.rrow.r1{border-color:rgba(255,215,0,.4)}.rrow.r2{border-color:rgba(180,180,190,.28)}.rrow.r3{border-color:rgba(205,127,50,.28)}
-.rbadge{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;background:rgba(255,255,255,.07);color:rgba(255,255,255,.35)}
-.r1 .rbadge{background:#ffd700;color:#000}.r2 .rbadge{background:#b4b4be;color:#000}.r3 .rbadge{background:#cd7f32;color:#fff}
-.rav{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.04)}
-.rname{flex:1;font-size:.78rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rcoins{font-size:.8rem;font-weight:800;display:flex;align-items:center;gap:4px}
-.ddots{display:flex;gap:2px}.dd{width:5px;height:5px;border-radius:50%;background:#ffd700}
-.ov-bot{background:rgba(0,0,0,.85);border:1.5px solid rgba(127,0,255,.4);border-radius:20px;padding:3px 12px;font-size:.68rem;font-weight:700}
+.chrono-box {
+  text-align: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+}
+.chrono-num {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 3.4rem;
+  font-weight: 700;
+  color: var(--green);
+  line-height: 1;
+  text-shadow: 0 0 24px rgba(57, 255, 20, 0.5);
+}
+.chrono-num.warn { color: #ffaa00; text-shadow: 0 0 24px rgba(255, 170, 0, 0.6); }
+.chrono-num.snipe { color: var(--red); text-shadow: 0 0 28px rgba(255, 59, 92, 0.9); animation: blink .8s ease infinite alternate; }
+@keyframes blink { from { opacity: 1; } to { opacity: 0.4; } }
 
-.pp{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;flex:1}
-.add-row{display:flex;gap:8px}
-.add-row input[type=text]{flex:1;padding:9px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;outline:none}
-.add-row input[type=text]:focus{border-color:var(--gold)}
-.plist{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}
-.prow{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px}
-.pav{width:32px;height:32px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,0.05)}
-.pinfo{flex:1;min-width:0}.pname{font-size:0.82rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pun{font-size:0.68rem;color:var(--muted)}
-.pcoins{font-size:0.9rem;font-weight:900;color:var(--gold);margin-right:4px}
-.qb{padding:4px 9px;border:none;border-radius:6px;font-family:'Outfit',sans-serif;font-weight:800;font-size:0.7rem;cursor:pointer;background:rgba(255,255,255,0.06);color:#ccc;border:1px solid var(--border);transition:all 0.15s}
-.qb:hover{background:rgba(255,255,255,0.15);color:#fff}.qb.del{background:rgba(255,59,92,0.15);color:#ff3b5c;border-color:rgba(255,59,92,0.3)}
-.qb.del:hover{background:#ff3b5c;color:#fff}
-.ci{width:56px;padding:3px 6px;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;color:var(--gold);font-family:'Outfit',sans-serif;font-weight:900;font-size:0.8rem;text-align:center;outline:none}
-.ci:focus{border-color:var(--gold)}
-.empty{text-align:center;padding:24px;color:var(--muted);font-size:0.8rem}
-.sep{border:none;border-top:1px solid var(--border);margin:4px 0}
-.toast{position:fixed;bottom:20px;right:20px;background:#00e676;color:#000;padding:10px 18px;border-radius:10px;font-weight:800;font-size:0.82rem;box-shadow:0 4px 20px rgba(0,230,118,0.4);display:none;z-index:999}
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.f { display: flex; flex-direction: column; gap: 5px; }
+.f label { font-size: 0.68rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.f input, .f select {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.f input:focus, .f select:focus { border-color: var(--gold); }
+
+.crow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.cd { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.15s; }
+.cd:hover { transform: scale(1.25); } .cd.on { border-color: #fff; box-shadow: 0 0 10px #fff; }
+
+.preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+.ov-card {
+  width: 310px;
+  background: rgba(7, 8, 15, 0.95);
+  border: 2.5px solid #ffd700;
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 0 34px rgba(255, 215, 0, 0.25);
+  transition: border-color .3s, box-shadow .3s;
+}
+.ov-top { background: rgba(0, 0, 0, 0.85); border: 1.5px solid #ffd700; border-radius: 30px; padding: 5px 18px; font-size: .8rem; font-weight: 800; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; }
+.ov-mid { display: flex; gap: 7px; width: 100%; justify-content: center; }
+.ov-pill { background: rgba(0, 0, 0, 0.85); border-radius: 30px; padding: 4px 12px; font-size: .68rem; font-weight: 800; display: flex; align-items: center; gap: 4px; }
+.ov-pill.min { border: 1.5px solid #ffd700; }.ov-pill.snipe { border: 1.5px solid rgba(255, 255, 255, 0.15); }.ov-pill.snipe.hot { border-color: var(--red); box-shadow: 0 0 14px rgba(255, 59, 92, 0.6); }
+.ov-pill .hl { color: #ffd700; }.ov-pill.snipe .hl { background: rgba(255, 255, 255, 0.1); padding: 1px 5px; border-radius: 4px; font-size: .64rem; }.ov-pill.snipe.hot .hl { background: var(--red); color: #fff; }
+.ov-timer { font-family: 'Share Tech Mono', monospace; font-size: 3rem; color: var(--green); text-shadow: 0 0 16px rgba(57, 255, 20, 0.55); line-height: 1; }
+.ov-timer.warn { color: #ffaa00; }.ov-timer.snipe { color: var(--red); text-shadow: 0 0 22px rgba(255, 59, 92, 0.8); animation: blink .8s ease infinite alternate; }
+
+.ranks { width: 100%; display: flex; flex-direction: column; gap: 7px; }
+.rrow { background: rgba(0, 0, 0, 0.68); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 11px; padding: 7px 11px; display: flex; align-items: center; gap: 9px; height: 44px; }
+.rrow.r1 { border-color: rgba(255, 215, 0, 0.4); }.rrow.r2 { border-color: rgba(180, 180, 190, 0.28); }.rrow.r3 { border-color: rgba(205, 127, 50, 0.28); }
+.rbadge { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .68rem; font-weight: 900; background: rgba(255, 255, 255, 0.07); color: rgba(255, 255, 255, 0.35); }
+.r1 .rbadge { background: #ffd700; color: #000; }.r2 .rbadge { background: #b4b4be; color: #000; }.r3 .rbadge { background: #cd7f32; color: #fff; }
+.rav { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.13); background: rgba(255, 255, 255, 0.04); }
+.rname { flex: 1; font-size: .8rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rcoins { font-size: .82rem; font-weight: 800; display: flex; align-items: center; gap: 4px; }
+.ddots { display: flex; gap: 2px; }.dd { width: 5px; height: 5px; border-radius: 50%; background: #ffd700; }
+.ov-bot { background: rgba(0, 0, 0, 0.85); border: 1.5px solid rgba(127, 0, 255, 0.4); border-radius: 20px; padding: 4px 14px; font-size: .7rem; font-weight: 700; }
+
+.victory-overlay {
+  position: absolute; inset: 0; background: rgba(7, 8, 15, 0.95); backdrop-filter: blur(12px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 20px; text-align: center; z-index: 100; border-radius: 20px; animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+.vic-title { font-size: 1.5rem; font-weight: 900; background: linear-gradient(135deg, var(--gold), #ff9900); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+.vic-sub { font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-bottom: 16px; }
+.vic-av { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--gold); box-shadow: 0 0 24px var(--gold); object-fit: cover; margin-bottom: 10px; }
+.vic-name { font-size: 1.2rem; font-weight: 900; color: #fff; }
+
+.pp { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.add-row { display: flex; gap: 10px; }
+.add-row input[type=text] { flex: 1; padding: 11px 16px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); border-radius: 10px; color: #fff; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.88rem; outline: none; }
+.add-row input[type=text]:focus { border-color: var(--gold); }
+.plist { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
+.prow { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 12px; }
+.pav { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+.pinfo { flex: 1; min-width: 0; } .pname { font-size: 0.86rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .pun { font-size: 0.7rem; color: var(--muted); }
+.pcoins { font-size: 0.95rem; font-weight: 900; color: var(--gold); margin-right: 6px; }
+.qb { padding: 5px 11px; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.72rem; cursor: pointer; background: rgba(255, 255, 255, 0.06); color: #ccc; border: 1px solid var(--border); transition: all 0.15s; }
+.qb:hover { background: rgba(255, 255, 255, 0.15); color: #fff; } .qb.del { background: rgba(255, 59, 92, 0.15); color: var(--red); border-color: rgba(255, 59, 92, 0.3); }
+.qb.del:hover { background: var(--red); color: #fff; }
+.ci { width: 62px; padding: 4px 8px; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border); border-radius: 8px; color: var(--gold); font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.85rem; text-align: center; outline: none; }
+.ci:focus { border-color: var(--gold); }
+.empty { text-align: center; padding: 30px; color: var(--muted); font-size: 0.85rem; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #00e676; color: #000; padding: 12px 22px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 6px 24px rgba(0, 230, 118, 0.4); display: none; z-index: 999; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div style="display:flex;align-items:center;gap:12px">
-    <div class="logo">🎯 TikTok Auction Live</div>
+  <div class="logo-group">
+    <div class="logo">🎯 TikTok Auction Live Pro</div>
     <div class="kbadge" id="key-badge">CLÉ: ...</div>
+    <div class="tt-status-badge off" id="tt-status-pill">
+      <div class="dot" id="tt-status-dot"></div>
+      <span id="tt-status-text">TikTok Hors Ligne</span>
+    </div>
   </div>
-  <div style="display:flex;gap:8px">
-    <button class="b bg" onclick="copyOv()">📺 Copier Overlay</button>
+
+  <div class="top-actions">
+    <div style="display:flex;gap:6px;align-items:center;background:rgba(255,255,255,0.04);padding:4px 8px;border-radius:10px;border:1px solid var(--border)">
+      <input id="tt-user" type="text" placeholder="@pseudo_tiktok" style="width:140px;padding:6px 10px;background:none;border:none;color:#fff;font-family:'Outfit';font-size:0.8rem;font-weight:700;outline:none">
+      <button class="b br" style="padding:6px 12px;font-size:0.75rem" onclick="tikConnect()">LIVE</button>
+      <button class="b bgr" style="padding:6px 10px;font-size:0.75rem" onclick="tikDisconnect()" title="Stop">✕</button>
+    </div>
+    <button class="b bg" onclick="copyOv()">📺 Copier Link Overlay</button>
     <button class="b br" onclick="logout()">Déconnexion</button>
   </div>
 </div>
@@ -109,16 +266,16 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:#e8eaf6;min-heig
       <div class="stitle">⏱️ Chronomètre & Snipe Delay</div>
       <div class="chrono-box">
         <div class="chrono-num" id="c-num">01:00</div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px" id="c-label">En attente</div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:4px" id="c-label">En attente</div>
       </div>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="b bb" style="flex:1" onclick="timer('start')">▶ Start</button>
         <button class="b bgr" style="flex:1" onclick="timer('pause')">⏸ Pause</button>
         <button class="b br" style="flex:1" onclick="timer('reset')">↺ Reset</button>
       </div>
-      <button class="b br" style="width:100%;margin-top:8px;font-size:0.85rem;padding:9px;justify-content:center" onclick="timer('add_time')">➕ ADD TIME (+ Snipe Delay)</button>
+      <button class="b br" style="width:100%;margin-top:10px;font-size:0.88rem;padding:10px;justify-content:center" onclick="timer('add_time')">➕ ADD TIME (+ Snipe Delay)</button>
 
-      <div class="grid2" style="margin-top:12px">
+      <div class="grid2" style="margin-top:14px">
         <div class="f"><label>Durée (sec)</label><input id="c-dur" type="number" value="60" min="5" oninput="setTimer()" onchange="setTimer()"></div>
         <div class="f"><label>Snipe Delay (sec)</label><input id="c-snipe" type="number" value="10" min="0" oninput="setTimer()" onchange="setTimer()"></div>
       </div>
@@ -150,7 +307,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:#e8eaf6;min-heig
     </div>
 
     <div class="card">
-      <div class="stitle">🎨 Couleur</div>
+      <div class="stitle">🎨 Couleur d'Overlay</div>
       <div class="crow">
         <div class="cd on" style="background:#ffd700" onclick="setColor('#ffd700',this)"></div>
         <div class="cd" style="background:#fff" onclick="setColor('#ffffff',this)"></div>
@@ -161,16 +318,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:#e8eaf6;min-heig
         <div class="cd" style="background:#ff3b5c" onclick="setColor('#ff3b5c',this)"></div>
         <input type="color" value="#ffd700" onchange="setColor(this.value,null)">
       </div>
-    </div>
-
-    <div class="card">
-      <div class="stitle">🔴 TikTok Live</div>
-      <div style="display:flex;gap:7px">
-        <div class="f" style="flex:1"><input id="tt-user" type="text" placeholder="@votre_tiktok"></div>
-        <button class="b br" style="flex:none;width:auto;padding:0 12px" onclick="tikConnect()">LIVE</button>
-        <button class="b bgr" style="flex:none;width:36px;padding:0" onclick="tikDisconnect()" title="Stop">✕</button>
-      </div>
-      <p style="font-size:.65rem;color:var(--muted);margin-top:6px;line-height:1.4">Les cadeaux TikTok sont convertis automatiquement en pièces.</p>
     </div>
   </div>
 
@@ -186,21 +333,27 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:#e8eaf6;min-heig
         <div class="ranks" id="pv-ranks"></div>
         <div class="ov-bot">👥 Participants : <span id="pv-tot">0</span></div>
       </div>
+
+      <div class="victory-overlay" id="vic-box" style="display:none">
+        <div class="vic-title" id="vic-title">🏆 WINNER!</div>
+        <div class="vic-sub" id="vic-sub">Victoire de l'enchère TikTok</div>
+        <div id="vic-content"></div>
+      </div>
     </div>
 
     <div class="pp">
-      <div class="stitle" style="margin:0">👥 Joueurs — Ajouter / Gérer les pièces</div>
+      <div class="stitle" style="margin:0">👥 Joueurs — Ajouter & Modifier Pièces</div>
       <div class="add-row">
         <input id="p-u" type="text" placeholder="@pseudo_tiktok" onkeydown="if(event.key==='Enter')addP()">
-        <input id="p-c" type="number" value="100" min="0" style="width:80px" placeholder="🪙">
-        <button class="b bb" style="flex:none;width:auto;padding:0 13px" onclick="addP()">+ Ajouter</button>
-        <button class="b br" style="flex:none;width:36px;padding:0" onclick="clearAll()" title="Tout effacer">🗑</button>
+        <input id="p-c" type="number" value="100" min="0" style="width:90px" placeholder="🪙">
+        <button class="b bb" style="flex:none;width:auto;padding:0 16px" onclick="addP()">+ Ajouter</button>
+        <button class="b br" style="flex:none;width:38px;padding:0" onclick="clearAll()" title="Tout effacer">🗑</button>
       </div>
-      <div class="add-row" style="margin-top:2px;gap:5px">
-        <button class="b bgr" style="font-size:0.7rem;padding:4px 8px" onclick="equalizeTop2()">⚖️ Égaliser #1 & #2</button>
-        <button class="b bgr" style="font-size:0.7rem;padding:4px 8px" onclick="equalizeTop3()">⚖️ Égaliser Top 3</button>
-        <button class="b bgr" style="font-size:0.7rem;padding:4px 8px" onclick="swapTop2()">🔀 Inverser #1 & #2</button>
-        <button class="b br"  style="font-size:0.7rem;padding:4px 8px" onclick="resetCoins()">🧹 RAZ Pièces</button>
+      <div class="add-row" style="margin-top:2px;gap:6px">
+        <button class="b bgr" style="font-size:0.72rem;padding:5px 10px" onclick="equalizeTop2()">⚖️ Égaliser #1 & #2</button>
+        <button class="b bgr" style="font-size:0.72rem;padding:5px 10px" onclick="equalizeTop3()">⚖️ Égaliser Top 3</button>
+        <button class="b bgr" style="font-size:0.72rem;padding:5px 10px" onclick="swapTop2()">🔀 Inverser #1 & #2</button>
+        <button class="b br"  style="font-size:0.72rem;padding:5px 10px" onclick="resetCoins()">🧹 RAZ Pièces</button>
       </div>
       <div class="plist" id="plist"></div>
     </div>
@@ -247,13 +400,56 @@ function getAvatar(p) {
 
 function render(s) {
   cfUrl = s.cf_url || null;
+
+  const pill = document.getElementById('tt-status-pill');
+  const dot = document.getElementById('tt-status-dot');
+  const txt = document.getElementById('tt-status-text');
+
+  if (s.tiktok === 'on') {
+    pill.className = 'tt-status-badge on';
+    dot.className = 'dot';
+    txt.textContent = `Live @${s.tiktok_user || ''}`;
+  } else if (s.tiktok === 'connecting') {
+    pill.className = 'tt-status-badge connecting';
+    dot.className = 'dot pulse';
+    txt.textContent = `Connexion à @${s.tiktok_user || ''}...`;
+  } else {
+    pill.className = 'tt-status-badge off';
+    dot.className = 'dot';
+    txt.textContent = 'TikTok Hors Ligne';
+  }
+
   const cn = document.getElementById('c-num'), cl = document.getElementById('c-label');
   const sec = s.snipe_on ? s.snipe_rem : s.timer_rem;
   if (cn) {
     cn.textContent = fmt(sec);
     cn.className = 'chrono-num' + (s.snipe_on?' snipe':s.timer_on&&s.timer_rem<s.snipe_dur?' warn':'');
   }
-  if (cl) cl.textContent = s.snipe_on?'🚨 SNIPE DELAY !':s.timer_on?'En cours...':s.timer_rem===0?'Terminé !':'En attente';
+  if (cl) cl.textContent = s.snipe_on?'🚨 SNIPE DELAY !':s.timer_on?'En cours...':sec===0?'🏆 ENCHÈRE TERMINÉE !':'En attente';
+
+  const vicBox = document.getElementById('vic-box');
+  if (sec === 0 && !s.timer_on && !s.snipe_on && s.players.length > 0) {
+    vicBox.style.display = 'flex';
+    const top = s.players.slice(0, 2);
+    if (top.length >= 2 && top[0].coins === top[1].coins && top[0].coins > 0) {
+      document.getElementById('vic-title').textContent = '🤝 ÉGALITÉ / TIE!';
+      document.getElementById('vic-sub').textContent = `Égalité parfaite avec ${top[0].coins} 🪙 !`;
+      document.getElementById('vic-content').innerHTML = `
+        <div style="display:flex;gap:16px;align-items:center;justify-content:center;margin-bottom:10px">
+          <div><img class="vic-av" src="${getAvatar(top[0])}"><div class="vic-name">@${esc(top[0].u)}</div></div>
+          <div style="font-size:1.4rem;font-weight:900;color:var(--gold)">VS</div>
+          <div><img class="vic-av" src="${getAvatar(top[1])}"><div class="vic-name">@${esc(top[1].u)}</div></div>
+        </div>`;
+    } else if (top[0].coins > 0) {
+      document.getElementById('vic-title').textContent = '🏆 WINNER!';
+      document.getElementById('vic-sub').textContent = `Victoire avec ${top[0].coins} 🪙 !`;
+      document.getElementById('vic-content').innerHTML = `
+        <img class="vic-av" src="${getAvatar(top[0])}">
+        <div class="vic-name">@${esc(top[0].u)}</div>`;
+    }
+  } else {
+    vicBox.style.display = 'none';
+  }
 
   const c = s.color||'#ffd700';
   const card = document.getElementById('pv-card');
@@ -334,72 +530,4 @@ function render(s) {
             <img class="pav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000'">
             <div class="pinfo"><div class="pname">${esc(p.name || p.nick || p.u)}</div><div class="pun">@${esc(p.u)}</div></div>
             <span class="pcoins">${p.coins}🪙</span>
-            <button class="qb" onclick="delta('${p.u}',10)">+10</button>
-            <button class="qb" onclick="delta('${p.u}',100)">+100</button>
-            <button class="qb" onclick="delta('${p.u}',1000)">+1k</button>
-            <input class="ci" type="number" value="${p.coins}"
-              onchange="setC('${p.u}',this.value)"
-              onkeydown="if(event.key==='Enter'){setC('${p.u}',this.value);this.blur()}">
-            <button class="qb del" onclick="removeP(${i}, '${esc(p.u)}')">✕</button>
-          </div>`).join('');
-      }
-    }
-  }
-}
-
-const api = (url, body) => fetch(url, {
-  method:'POST',
-  headers:{'Content-Type':'application/json'},
-  body: JSON.stringify({...body, key: KEY})
-});
-
-function timer(action)   { api('/api/timer', {action}); }
-function setTimer()      { api('/api/timer', {action:'set', duration:+document.getElementById('c-dur').value||60, snipe_delay:+document.getElementById('c-snipe').value||10}); }
-function setColor(c,el)  { document.querySelectorAll('.cd.on').forEach(d=>d.classList.remove('on')); if(el)el.classList.add('on'); api('/api/color',{color:c}); }
-function tikConnect()    { const u=document.getElementById('tt-user').value.trim(); if(u) api('/api/tiktok',{action:'connect',user:u}); }
-function tikDisconnect() { api('/api/tiktok',{action:'disconnect'}); }
-function addP()          { lastPlayersSig = ''; const u=document.getElementById('p-u').value.trim(); if(!u)return; const c=parseInt(document.getElementById('p-c').value)||0; api('/api/player',{action:'add',u,coins:c}); document.getElementById('p-u').value=''; document.getElementById('p-u').focus(); }
-function delta(u,v)      { lastPlayersSig = ''; api('/api/player',{action:'coins',u,mode:'delta',val:v}); }
-function setC(u,v)       { lastPlayersSig = ''; api('/api/player',{action:'coins',u,mode:'set',val:parseInt(v)||0}); }
-function removeP(idx,u)  { lastPlayersSig = ''; api('/api/player',{action:'remove',idx:idx,u:u}); }
-function clearAll()      { lastPlayersSig = ''; api('/api/player',{action:'clear'}); }
-function equalizeTop2()  { lastPlayersSig = ''; api('/api/player', {action:'equalize_top2'}); }
-function equalizeTop3()  { lastPlayersSig = ''; api('/api/player', {action:'equalize_top3'}); }
-function swapTop2()      { lastPlayersSig = ''; api('/api/player', {action:'swap_top2'}); }
-function resetCoins()    { lastPlayersSig = ''; api('/api/player', {action:'reset_coins'}); }
-function updateVouchesConfig() {
-  const val = document.getElementById('vouch-input').value.trim() || '100 VOUCHES';
-  api('/api/config', { vouches_val: val });
-}
-function updateMinConfig() {
-  const mode = document.getElementById('min-mode').value;
-  const val = parseInt(document.getElementById('min-val-input').value) || 1;
-  document.getElementById('min-val-box').style.display = mode === 'min' ? 'block' : 'none';
-  api('/api/config', {
-    min_bid_enabled: mode === 'min',
-    min_bid_val: val
-  });
-}
-
-function copyCf() {
-  if (!cfUrl) return;
-  navigator.clipboard.writeText(cfUrl).then(()=>toast('✅ Lien copié !'));
-}
-function copyOv() {
-  const base = cfUrl || window.location.origin;
-  const ovLink = `${base}/overlay?key=${KEY}`;
-  navigator.clipboard.writeText(ovLink).then(()=>toast('📺 Lien Overlay personnalisé copié !'));
-}
-function logout() {
-  localStorage.removeItem('user_key');
-  window.location.href = '/';
-}
-
-function toast(msg) {
-  const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block';
-  setTimeout(()=>t.style.display='none',2500);
-}
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-</script>
-</body>
-</html>
+            <button class="qb" onclick="delta('${p
