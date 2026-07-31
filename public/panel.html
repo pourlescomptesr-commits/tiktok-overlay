@@ -530,4 +530,72 @@ function render(s) {
             <img class="pav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000'">
             <div class="pinfo"><div class="pname">${esc(p.name || p.nick || p.u)}</div><div class="pun">@${esc(p.u)}</div></div>
             <span class="pcoins">${p.coins}🪙</span>
-            <button class="qb" onclick="delta('${p
+            <button class="qb" onclick="delta('${p.u}',10)">+10</button>
+            <button class="qb" onclick="delta('${p.u}',100)">+100</button>
+            <button class="qb" onclick="delta('${p.u}',1000)">+1k</button>
+            <input class="ci" type="number" value="${p.coins}"
+              onchange="setC('${p.u}',this.value)"
+              onkeydown="if(event.key==='Enter'){setC('${p.u}',this.value);this.blur()}">
+            <button class="qb del" onclick="removeP(${i}, '${esc(p.u)}')">✕</button>
+          </div>`).join('');
+      }
+    }
+  }
+}
+
+const api = (url, body) => fetch(url, {
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({...body, key: KEY})
+});
+
+function timer(action)   { api('/api/timer', {action}); }
+function setTimer()      { api('/api/timer', {action:'set', duration:+document.getElementById('c-dur').value||60, snipe_delay:+document.getElementById('c-snipe').value||10}); }
+function setColor(c,el)  { document.querySelectorAll('.cd.on').forEach(d=>d.classList.remove('on')); if(el)el.classList.add('on'); api('/api/color',{color:c}); }
+function tikConnect()    { const u=document.getElementById('tt-user').value.trim(); if(u) api('/api/tiktok',{action:'connect',user:u}); }
+function tikDisconnect() { api('/api/tiktok',{action:'disconnect'}); }
+function addP()          { lastPlayersSig = ''; const u=document.getElementById('p-u').value.trim(); if(!u)return; const c=parseInt(document.getElementById('p-c').value)||0; api('/api/player',{action:'add',u,coins:c}); document.getElementById('p-u').value=''; document.getElementById('p-u').focus(); }
+function delta(u,v)      { lastPlayersSig = ''; api('/api/player',{action:'coins',u,mode:'delta',val:v}); }
+function setC(u,v)       { lastPlayersSig = ''; api('/api/player',{action:'coins',u,mode:'set',val:parseInt(v)||0}); }
+function removeP(idx,u)  { lastPlayersSig = ''; api('/api/player',{action:'remove',idx:idx,u:u}); }
+function clearAll()      { lastPlayersSig = ''; api('/api/player',{action:'clear'}); }
+function equalizeTop2()  { lastPlayersSig = ''; api('/api/player', {action:'equalize_top2'}); }
+function equalizeTop3()  { lastPlayersSig = ''; api('/api/player', {action:'equalize_top3'}); }
+function swapTop2()      { lastPlayersSig = ''; api('/api/player', {action:'swap_top2'}); }
+function resetCoins()    { lastPlayersSig = ''; api('/api/player', {action:'reset_coins'}); }
+function updateVouchesConfig() {
+  const val = document.getElementById('vouch-input').value.trim() || '100 VOUCHES';
+  api('/api/config', { vouches_val: val });
+}
+function updateMinConfig() {
+  const mode = document.getElementById('min-mode').value;
+  const val = parseInt(document.getElementById('min-val-input').value) || 1;
+  document.getElementById('min-val-box').style.display = mode === 'min' ? 'block' : 'none';
+  api('/api/config', {
+    min_bid_enabled: mode === 'min',
+    min_bid_val: val
+  });
+}
+
+function copyCf() {
+  if (!cfUrl) return;
+  navigator.clipboard.writeText(cfUrl).then(()=>toast('✅ Lien copié !'));
+}
+function copyOv() {
+  const base = cfUrl || window.location.origin;
+  const ovLink = `${base}/overlay?key=${KEY}`;
+  navigator.clipboard.writeText(ovLink).then(()=>toast('📺 Lien Overlay copié !'));
+}
+function logout() {
+  localStorage.removeItem('user_key');
+  window.location.href = '/';
+}
+
+function toast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block';
+  setTimeout(()=>t.style.display='none',2500);
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
