@@ -17,12 +17,11 @@ def notify_flask(endpoint, data):
             url = f"http://{host}:{port}{endpoint}"
             payload = json.dumps({"key": key, **data}).encode('utf-8')
             req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'})
-            with urllib.request.urlopen(req, timeout=2) as resp:
+            with urllib.request.urlopen(req, timeout=1.5) as resp:
                 if resp.status == 200:
                     return
         except Exception:
             pass
-    print(f"[TikTok Worker Notify Failed] {endpoint}", flush=True)
 
 def fetch_room_id(user):
     try:
@@ -34,10 +33,10 @@ def fetch_room_id(user):
             'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
             'Referer': 'https://www.tiktok.com/'
         })
-        html = opener.open(req, timeout=8).read().decode('utf-8', errors='ignore')
+        html = opener.open(req, timeout=2.5).read().decode('utf-8', errors='ignore')
         m = re.search(r'"roomId"\s*:\s*"(\d+)"', html) or re.search(r'room_id=(\d+)', html) or re.search(r'"roomId":(\d+)', html)
         if m:
-            print(f"[TikTok Worker] RoomID extrait avec succès: {m.group(1)}", flush=True)
+            print(f"[TikTok Worker] RoomID extrait: {m.group(1)}", flush=True)
             return m.group(1)
     except Exception as e:
         print(f"[TikTok Worker RoomID Scrape Error] {e}", flush=True)
@@ -49,10 +48,10 @@ from TikTokLive.client.web.routes.fetch_signed_websocket import WebcastPlatform
 
 platforms = [WebcastPlatform.WEB, WebcastPlatform.MOBILE]
 
-for attempt in range(1, 6):
+for attempt in range(1, 3):
     for platform in platforms:
         try:
-            print(f"[TikTok Worker] Essai plate-forme {platform.name} pour @{username}...", flush=True)
+            print(f"[TikTok Worker] Essai {attempt} {platform.name} pour @{username}...", flush=True)
             notify_flask('/api/internal/tiktok_status', {"status": "connecting", "user": username})
 
             room_id = fetch_room_id(username)
@@ -63,7 +62,7 @@ for attempt in range(1, 6):
 
             @client.on(ConnectEvent)
             async def on_connect(e):
-                print(f"[TikTok Worker] Connecté avec succès à @{username} via {platform.name} !", flush=True)
+                print(f"[TikTok Worker] Connecté à @{username} via {platform.name} !", flush=True)
                 notify_flask('/api/internal/tiktok_status', {"status": "on", "user": username})
 
             @client.on(DisconnectEvent)
@@ -105,6 +104,6 @@ for attempt in range(1, 6):
             break
         except Exception as ex:
             print(f"[TikTok Worker Platform {platform.name} Error @{username}] {ex}", flush=True)
-            time.sleep(2)
+            time.sleep(1)
 
 notify_flask('/api/internal/tiktok_status', {"status": "off", "user": ""})
