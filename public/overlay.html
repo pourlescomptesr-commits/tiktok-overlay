@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Overlay Stream Pro — TikTok Auction Live</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Outfit:wght@700;800;900&family=Share+Tech+Mono&family=Teko:wght@700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
@@ -15,48 +15,108 @@ html, body {
   font-family: 'Outfit', sans-serif; color: #fff;
 }
 
+/* BASE STACKED OVERLAY */
 .stacked-overlay {
   display: flex; flex-direction: column; gap: 10px;
-  width: 330px; position: relative; z-index: 10;
+  width: 340px; position: relative; z-index: 10;
+  transition: all 0.4s ease;
 }
 
-.pill-card {
-  background: rgba(7, 6, 20, 0.94);
-  border-radius: 14px;
-  padding: 11px 18px;
+/* THEME 1: HYPERCODE (Modular Stacked Cards) */
+body.theme-hypercode .pill-card {
+  background: rgba(7, 6, 20, 0.94); border-radius: 14px; padding: 11px 18px;
   display: flex; align-items: center; justify-content: space-between;
-  font-size: 0.85rem; font-weight: 900; letter-spacing: 1.5px;
-  text-transform: uppercase;
+  font-size: 0.85rem; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-  transition: all 0.3s;
 }
-.pill-card.min { border: 2px solid #00e676; color: #00e676; box-shadow: 0 0 15px rgba(0,230,118,0.25); }
-.pill-card.snipe { border: 2px solid #ff3b5c; color: #fff; box-shadow: 0 0 15px rgba(255,59,92,0.3); }
-.pill-card.snipe .val { background: #ff3b5c; padding: 3px 10px; border-radius: 8px; color: #fff; font-weight: 900; }
-.pill-card.vouch { border: 2px solid #b026ff; color: #ce93d8; box-shadow: 0 0 15px rgba(176,38,255,0.25); }
-
-.main-box {
-  background: rgba(7, 6, 20, 0.96);
-  border: 2.5px solid #00f3ff;
-  border-radius: 22px;
-  padding: 22px 18px 16px 18px;
-  display: flex; flex-direction: column; align-items: center; gap: 14px;
-  box-shadow: 0 0 40px rgba(0, 243, 255, 0.3);
-  position: relative; overflow: hidden;
-  transition: border-color 0.3s, box-shadow 0.3s;
+body.theme-hypercode .pill-card.min { border: 2px solid #00e676; color: #00e676; box-shadow: 0 0 15px rgba(0,230,118,0.25); }
+body.theme-hypercode .pill-card.snipe { border: 2px solid #ff3b5c; color: #fff; box-shadow: 0 0 15px rgba(255,59,92,0.3); }
+body.theme-hypercode .pill-card.snipe .val { background: #ff3b5c; padding: 3px 10px; border-radius: 8px; color: #fff; font-weight: 900; }
+body.theme-hypercode .pill-card.vouch { border: 2px solid #b026ff; color: #ce93d8; box-shadow: 0 0 15px rgba(176,38,255,0.25); }
+body.theme-hypercode .main-box {
+  background: rgba(7, 6, 20, 0.96); border: 2.5px solid var(--accent, #00f3ff); border-radius: 22px;
+  padding: 22px 18px 16px 18px; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  box-shadow: 0 0 40px rgba(0, 243, 255, 0.3); position: relative; overflow: hidden;
 }
-
-.timer-num {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 3.6rem; font-weight: 700;
-  color: #39ff14; text-shadow: 0 0 24px rgba(57, 255, 20, 0.7);
+body.theme-hypercode .timer-num {
+  font-family: 'Orbitron', sans-serif; font-size: 3.6rem; font-weight: 900;
+  color: #39ff14; text-shadow: 0 0 25px rgba(57, 255, 20, 0.75), 0 0 50px rgba(57,255,20,0.4);
   line-height: 1; letter-spacing: 2px;
 }
-.timer-num.warn { color: #ffaa00; text-shadow: 0 0 24px rgba(255, 170, 0, 0.8); }
-.timer-num.snipe { color: #ff3b5c; text-shadow: 0 0 28px rgba(255, 59, 92, 0.95); animation: blink 0.8s ease infinite alternate; }
+
+/* THEME 2: CYBER RECT (Cyberpunk Rectangular Heavy Frame) */
+body.theme-cyber_rect .stacked-overlay { width: 360px; gap: 6px; }
+body.theme-cyber_rect .pill-card {
+  background: rgba(4, 18, 30, 0.96); border-radius: 0px; padding: 10px 16px;
+  border-left: 4px solid var(--accent, #00f3ff); border-right: 1px solid rgba(0, 243, 255, 0.3);
+  font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; font-weight: 700; text-transform: uppercase;
+}
+body.theme-cyber_rect .pill-card.snipe .val { background: #ff3b5c; color: #fff; padding: 2px 8px; border-radius: 0; }
+body.theme-cyber_rect .main-box {
+  background: rgba(2, 10, 20, 0.98); border: 2px solid var(--accent, #00f3ff); border-radius: 0px;
+  padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;
+  box-shadow: inset 0 0 30px rgba(0, 243, 255, 0.2), 0 0 30px rgba(0, 243, 255, 0.4);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+}
+body.theme-cyber_rect .timer-num {
+  font-family: 'Share Tech Mono', monospace; font-size: 3.8rem; font-weight: 700;
+  color: var(--accent, #00f3ff); text-shadow: 0 0 25px var(--accent, #00f3ff); line-height: 1;
+}
+
+/* THEME 3: GALAXY PORTAL (Cosmic Deep Space Orbit) */
+body.theme-galaxy_portal .stacked-overlay { width: 340px; gap: 12px; }
+body.theme-galaxy_portal .pill-card {
+  background: rgba(13, 11, 38, 0.95); border-radius: 30px; padding: 10px 20px;
+  border: 1.5px solid rgba(176, 38, 255, 0.4); color: #ce93d8; font-size: 0.82rem; font-weight: 900;
+}
+body.theme-galaxy_portal .pill-card.snipe .val { background: #b026ff; color: #fff; padding: 3px 10px; border-radius: 20px; }
+body.theme-galaxy_portal .main-box {
+  background: radial-gradient(circle at 50% 30%, rgba(107, 17, 255, 0.4) 0%, rgba(7, 6, 20, 0.98) 70%);
+  border: 2px solid #b026ff; border-radius: 28px; padding: 24px 20px;
+  box-shadow: 0 0 50px rgba(176, 38, 255, 0.4), inset 0 0 25px rgba(107, 17, 255, 0.3);
+}
+body.theme-galaxy_portal .timer-num {
+  font-family: 'Teko', sans-serif; font-size: 4.5rem; font-weight: 700;
+  color: #fff; text-shadow: 0 0 30px #b026ff, 0 0 60px #6b11ff; line-height: 0.9;
+}
+
+/* THEME 4: MINIMAL GLASS (Luxury Glassmorphism) */
+body.theme-minimal_glass .pill-card {
+  background: rgba(255, 255, 255, 0.06); border-radius: 16px; padding: 10px 16px;
+  backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.8rem; font-weight: 800; color: #fff;
+}
+body.theme-minimal_glass .main-box {
+  background: rgba(20, 20, 30, 0.75); border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px; padding: 22px; backdrop-filter: blur(30px);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+body.theme-minimal_glass .timer-num {
+  font-family: 'Outfit', sans-serif; font-size: 3.5rem; font-weight: 900;
+  color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.6); line-height: 1;
+}
+
+/* THEME 5: NEON STREAMER (Vibrant Double Neon Frame) */
+body.theme-neon_streamer .pill-card {
+  background: #000; border-radius: 12px; padding: 10px 16px;
+  border: 2px solid #ff007f; color: #ff007f; box-shadow: 0 0 15px #ff007f;
+  font-size: 0.82rem; font-weight: 900;
+}
+body.theme-neon_streamer .main-box {
+  background: #050508; border: 3px solid #00f3ff; border-radius: 20px; padding: 22px;
+  box-shadow: 0 0 25px #00f3ff, inset 0 0 15px #ff007f;
+}
+body.theme-neon_streamer .timer-num {
+  font-family: 'Orbitron', sans-serif; font-size: 3.6rem; font-weight: 900;
+  color: #ff007f; text-shadow: 0 0 25px #ff007f, 0 0 50px #00f3ff; line-height: 1;
+}
+
+/* GENERAL STYLES & MEDALS */
+.timer-num.warn { color: #ffaa00 !important; text-shadow: 0 0 25px #ffaa00 !important; }
+.timer-num.snipe { color: #ff3b5c !important; text-shadow: 0 0 30px #ff3b5c !important; animation: blink 0.8s ease infinite alternate; }
 @keyframes blink { from { opacity: 1; } to { opacity: 0.35; } }
 
-.sep { width: 100%; height: 1.5px; background: linear-gradient(90deg, transparent, #00f3ff, transparent); margin: -2px 0 2px 0; }
+.sep { width: 100%; height: 1.5px; background: linear-gradient(90deg, transparent, var(--accent, #00f3ff), transparent); margin: -2px 0 2px 0; }
 
 .ranks { width: 100%; display: flex; flex-direction: column; gap: 9px; }
 .rrow {
@@ -65,7 +125,7 @@ html, body {
   border-radius: 14px; padding: 8px 12px;
   display: flex; align-items: center; gap: 10px; height: 52px;
 }
-.rrow.r1 { border-color: #00f3ff; background: rgba(0, 243, 255, 0.08); box-shadow: 0 0 15px rgba(0, 243, 255, 0.25); }
+.rrow.r1 { border-color: var(--accent, #00f3ff); background: rgba(0, 243, 255, 0.08); box-shadow: 0 0 15px rgba(0, 243, 255, 0.25); }
 .rrow.r2 { border-color: rgba(180, 180, 190, 0.4); }
 .rrow.r3 { border-color: rgba(205, 127, 50, 0.4); }
 
@@ -78,10 +138,10 @@ html, body {
   display: flex; align-items: center; justify-content: center;
   font-size: 0.6rem; font-weight: 900; background: #fff; color: #000;
 }
-.r1 .rbadge { background: #00f3ff; } .r2 .rbadge { background: #b4b4be; } .r3 .rbadge { background: #cd7f32; color: #fff; }
+.r1 .rbadge { background: var(--accent, #00f3ff); } .r2 .rbadge { background: #b4b4be; } .r3 .rbadge { background: #cd7f32; color: #fff; }
 
 .rname { flex: 1; font-size: 0.88rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rcoins { font-size: 0.95rem; font-weight: 900; color: #00f3ff; display: flex; align-items: center; gap: 4px; }
+.rcoins { font-size: 0.95rem; font-weight: 900; color: var(--accent, #00f3ff); display: flex; align-items: center; gap: 4px; }
 
 .bot-bar { font-size: 0.74rem; font-weight: 800; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; gap: 6px; }
 
@@ -92,15 +152,15 @@ html, body {
   animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 @keyframes popIn { from { opacity: 0; transform: scale(0.75); } to { opacity: 1; transform: scale(1); } }
-.vic-title { font-size: 1.9rem; font-weight: 900; background: linear-gradient(135deg, #00f3ff, #b026ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+.vic-title { font-size: 1.9rem; font-weight: 900; background: linear-gradient(135deg, var(--accent, #00f3ff), #b026ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
 .vic-sub { font-size: 0.85rem; color: rgba(255,255,255,0.65); font-weight: 700; margin-bottom: 18px; }
-.vic-av { width: 84px; height: 84px; border-radius: 50%; border: 3.5px solid #00f3ff; box-shadow: 0 0 35px #00f3ff; object-fit: cover; margin-bottom: 12px; }
+.vic-av { width: 84px; height: 84px; border-radius: 50%; border: 3.5px solid var(--accent, #00f3ff); box-shadow: 0 0 35px var(--accent, #00f3ff); object-fit: cover; margin-bottom: 12px; }
 .vic-name { font-size: 1.35rem; font-weight: 900; color: #fff; }
 
 .err-msg { background: rgba(255,59,92,0.9); color: #fff; padding: 20px; border-radius: 14px; font-weight: 800; text-align: center; }
 </style>
 </head>
-<body>
+<body class="theme-hypercode">
 
 <div class="stacked-overlay" id="ov-container">
   <div class="pill-card min" id="ov-min"><span>✅ MINIMUM</span><span id="min-val">AUCUN</span></div>
@@ -155,17 +215,19 @@ function getAvatar(p) {
 }
 
 function render(s) {
+  if (s.theme) {
+    document.body.className = `theme-${s.theme}`;
+  }
+
   const c = s.color || '#00f3ff';
-  const box = document.getElementById('ov-box');
-  box.style.borderColor = c;
-  box.style.boxShadow = `0 0 35px ${c}40`;
+  document.documentElement.style.setProperty('--accent', c);
 
   document.getElementById('ov-vouch').textContent = s.vouches_val || '100 VOUCHES';
 
   const minCard = document.getElementById('ov-min');
   if (s.min_bid_enabled) {
     document.getElementById('min-val').textContent = `${s.min_bid_val||1} 🪙`;
-    minCard.style.borderColor = c;
+    minCard.style.display = 'flex';
   } else {
     document.getElementById('min-val').textContent = `AUCUN`;
   }
@@ -173,10 +235,8 @@ function render(s) {
   const sCard = document.getElementById('ov-snipe');
   const snipeVal = document.getElementById('snipe-val');
   if (s.snipe_on) {
-    sCard.style.borderColor = '#ff3b5c';
     snipeVal.textContent = `${Math.ceil(s.snipe_rem)}S`;
   } else {
-    sCard.style.borderColor = 'rgba(255,255,255,0.2)';
     snipeVal.textContent = `${Math.ceil(s.snipe_dur)}S`;
   }
 
@@ -196,7 +256,7 @@ function render(s) {
       document.getElementById('vic-content').innerHTML = `
         <div style="display:flex;gap:18px;align-items:center;justify-content:center;margin-bottom:12px">
           <div><img class="vic-av" src="${getAvatar(top[0])}"><div class="vic-name">@${esc(top[0].u)}</div></div>
-          <div style="font-size:1.6rem;font-weight:900;color:#00f3ff">VS</div>
+          <div style="font-size:1.6rem;font-weight:900;color:var(--accent)">VS</div>
           <div><img class="vic-av" src="${getAvatar(top[1])}"><div class="vic-name">@${esc(top[1].u)}</div></div>
         </div>`;
     } else if (top[0].coins > 0) {
