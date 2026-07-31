@@ -288,6 +288,7 @@ def api_players():
                 s["players"].append({
                     "u": u,
                     "nick": u,
+                    "name": u,
                     "av": f"https://api.dicebear.com/7.x/initials/svg?seed={u}",
                     "coins": coins
                 })
@@ -415,11 +416,13 @@ def api_internal_gift():
     ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
     if ex:
         ex["coins"] += coins
-        if nick: ex["nick"] = nick
+        if nick:
+            ex["nick"] = nick
+            ex["name"] = nick
         if av: ex["av"] = av
     else:
         s["players"].append({
-            "u": u, "nick": nick or u, "av": av or f"https://api.dicebear.com/7.x/initials/svg?seed={u}",
+            "u": u, "nick": nick or u, "name": nick or u, "av": av or f"https://api.dicebear.com/7.x/initials/svg?seed={u}",
             "coins": coins
         })
 
