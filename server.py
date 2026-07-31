@@ -251,6 +251,7 @@ def api_timer():
     return jsonify(ok=True, state=get_public_state(s))
 
 @app.route('/api/config', methods=['POST'])
+@app.route('/api/color', methods=['POST'])
 def api_config():
     k = get_key_strict()
     if not k: return jsonify(error="Clé invalide"), 403
@@ -266,6 +267,7 @@ def api_config():
     notify(s)
     return jsonify(ok=True, state=get_public_state(s))
 
+@app.route('/api/player', methods=['POST'])
 @app.route('/api/players', methods=['POST'])
 def api_players():
     k = get_key_strict()
@@ -276,7 +278,7 @@ def api_players():
     a = data.get('action')
 
     if a == 'add':
-        u = str(data.get('user', '')).strip().lstrip('@')
+        u = str(data.get('user') or data.get('u') or '').strip().lstrip('@')
         coins = int(data.get('coins', 100))
         if u:
             ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
@@ -291,8 +293,18 @@ def api_players():
                 })
             trigger_snipe_check(s)
 
+    elif a == 'coins':
+        u = str(data.get('user') or data.get('u') or '').strip().lstrip('@')
+        mode = data.get('mode', 'delta')
+        val = int(data.get('val', 0))
+        ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
+        if ex:
+            if mode == 'delta': ex["coins"] = max(0, ex["coins"] + val)
+            elif mode == 'set': ex["coins"] = max(0, val)
+            trigger_snipe_check(s)
+
     elif a == 'remove':
-        u = str(data.get('user', '')).strip().lstrip('@')
+        u = str(data.get('user') or data.get('u') or '').strip().lstrip('@')
         s["players"] = [p for p in s["players"] if p["u"].lower() != u.lower()]
 
     elif a == 'clear':
