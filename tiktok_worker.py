@@ -36,7 +36,12 @@ for attempt in range(1, 3):
             print(f"[TikTok Worker] Essai {attempt} {platform.name} pour @{username}...", flush=True)
             notify_flask('/api/internal/tiktok_status', {"status": "connecting", "user": username})
 
-            client = TikTokLiveClient(unique_id=username, platform=platform, web_proxy=httpx_proxy, ws_proxy=None)
+            client = TikTokLiveClient(
+                unique_id=username,
+                platform=platform,
+                web_proxy=httpx_proxy,
+                ws_proxy=httpx_proxy
+            )
             client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
             @client.on(ConnectEvent)
@@ -65,13 +70,19 @@ for attempt in range(1, 3):
 
                     total_coins = max(1, int(diamonds) * int(repeat))
 
+                    av = None
                     try:
-                        urls = getattr(e.user.avatar, 'urls', [])
-                        av = urls[0] if urls else f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
-                    except:
+                        if hasattr(e.user, 'avatar') and e.user.avatar:
+                            urls = getattr(e.user.avatar, 'urls', [])
+                            if urls:
+                                av = urls[-1] or urls[0]
+                    except Exception:
+                        pass
+
+                    if not av:
                         av = f"https://api.dicebear.com/7.x/initials/svg?seed={u}"
 
-                    print(f"[TikTok Gift] @{u} ({nick}) -> +{total_coins} 🪙", flush=True)
+                    print(f"[TikTok Gift] @{u} ({nick}) -> +{total_coins} 🪙 (av={av[:30]}...)", flush=True)
 
                     notify_flask('/api/internal/gift', {
                         "u": u, "nick": nick, "av": av, "coins": total_coins
