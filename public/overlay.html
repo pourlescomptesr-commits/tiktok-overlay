@@ -17,85 +17,85 @@ html, body {
 
 .stacked-overlay {
   display: flex; flex-direction: column; gap: 10px;
-  width: 320px; position: relative;
+  width: 330px; position: relative; z-index: 10;
 }
 
 .pill-card {
-  background: rgba(10, 14, 22, 0.94);
-  border-radius: 12px;
-  padding: 10px 16px;
+  background: rgba(7, 6, 20, 0.94);
+  border-radius: 14px;
+  padding: 11px 18px;
   display: flex; align-items: center; justify-content: space-between;
   font-size: 0.85rem; font-weight: 900; letter-spacing: 1.5px;
   text-transform: uppercase;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
   transition: all 0.3s;
 }
-.pill-card.min { border: 2px solid #00e676; color: #00e676; }
-.pill-card.snipe { border: 2px solid #ff3b5c; color: #fff; }
-.pill-card.snipe .val { background: #ff3b5c; padding: 2px 8px; border-radius: 6px; color: #fff; }
-.pill-card.vouch { border: 2px solid #9c27b0; color: #ce93d8; }
+.pill-card.min { border: 2px solid #00e676; color: #00e676; box-shadow: 0 0 15px rgba(0,230,118,0.25); }
+.pill-card.snipe { border: 2px solid #ff3b5c; color: #fff; box-shadow: 0 0 15px rgba(255,59,92,0.3); }
+.pill-card.snipe .val { background: #ff3b5c; padding: 3px 10px; border-radius: 8px; color: #fff; font-weight: 900; }
+.pill-card.vouch { border: 2px solid #b026ff; color: #ce93d8; box-shadow: 0 0 15px rgba(176,38,255,0.25); }
 
 .main-box {
-  background: rgba(10, 14, 22, 0.96);
-  border: 2.5px solid #ffd700;
-  border-radius: 20px;
-  padding: 20px 16px 14px 16px;
+  background: rgba(7, 6, 20, 0.96);
+  border: 2.5px solid #00f3ff;
+  border-radius: 22px;
+  padding: 22px 18px 16px 18px;
   display: flex; flex-direction: column; align-items: center; gap: 14px;
-  box-shadow: 0 0 35px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 40px rgba(0, 243, 255, 0.3);
   position: relative; overflow: hidden;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .timer-num {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 3.4rem; font-weight: 700;
-  color: #39ff14; text-shadow: 0 0 20px rgba(57, 255, 20, 0.65);
+  font-size: 3.6rem; font-weight: 700;
+  color: #39ff14; text-shadow: 0 0 24px rgba(57, 255, 20, 0.7);
   line-height: 1; letter-spacing: 2px;
 }
-.timer-num.warn { color: #ffaa00; text-shadow: 0 0 20px rgba(255, 170, 0, 0.7); }
-.timer-num.snipe { color: #ff3b5c; text-shadow: 0 0 26px rgba(255, 59, 92, 0.9); animation: blink 0.8s ease infinite alternate; }
+.timer-num.warn { color: #ffaa00; text-shadow: 0 0 24px rgba(255, 170, 0, 0.8); }
+.timer-num.snipe { color: #ff3b5c; text-shadow: 0 0 28px rgba(255, 59, 92, 0.95); animation: blink 0.8s ease infinite alternate; }
 @keyframes blink { from { opacity: 1; } to { opacity: 0.35; } }
 
-.sep { width: 100%; height: 1px; background: rgba(255, 215, 0, 0.25); margin: -2px 0 2px 0; }
+.sep { width: 100%; height: 1.5px; background: linear-gradient(90deg, transparent, #00f3ff, transparent); margin: -2px 0 2px 0; }
 
 .ranks { width: 100%; display: flex; flex-direction: column; gap: 9px; }
 .rrow {
   background: rgba(255, 255, 255, 0.04);
   border: 1.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px; padding: 8px 12px;
-  display: flex; align-items: center; gap: 10px; height: 50px;
+  display: flex; align-items: center; gap: 10px; height: 52px;
 }
-.rrow.r1 { border-color: #ffd700; background: rgba(255, 215, 0, 0.08); box-shadow: 0 0 12px rgba(255, 215, 0, 0.2); }
+.rrow.r1 { border-color: #00f3ff; background: rgba(0, 243, 255, 0.08); box-shadow: 0 0 15px rgba(0, 243, 255, 0.25); }
 .rrow.r2 { border-color: rgba(180, 180, 190, 0.4); }
 .rrow.r3 { border-color: rgba(205, 127, 50, 0.4); }
 
-.medal { font-size: 1.2rem; }
-.rav-wrap { position: relative; width: 34px; height: 34px; }
-.rav { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); }
+.medal { font-size: 1.25rem; }
+.rav-wrap { position: relative; width: 36px; height: 36px; }
+.rav { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.25); background: rgba(0,0,0,0.4); }
 .rbadge {
   position: absolute; bottom: -3px; right: -3px;
   width: 16px; height: 16px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 0.6rem; font-weight: 900; background: #fff; color: #000;
 }
-.r1 .rbadge { background: #ffd700; } .r2 .rbadge { background: #b4b4be; } .r3 .rbadge { background: #cd7f32; color: #fff; }
+.r1 .rbadge { background: #00f3ff; } .r2 .rbadge { background: #b4b4be; } .r3 .rbadge { background: #cd7f32; color: #fff; }
 
-.rname { flex: 1; font-size: 0.85rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rcoins { font-size: 0.9rem; font-weight: 900; color: #ffd700; display: flex; align-items: center; gap: 4px; }
+.rname { flex: 1; font-size: 0.88rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rcoins { font-size: 0.95rem; font-weight: 900; color: #00f3ff; display: flex; align-items: center; gap: 4px; }
 
 .bot-bar { font-size: 0.74rem; font-weight: 800; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; gap: 6px; }
 
 .victory-modal {
-  position: absolute; inset: 0; background: rgba(7, 8, 15, 0.96); backdrop-filter: blur(14px);
+  position: absolute; inset: 0; background: rgba(7, 6, 20, 0.97); backdrop-filter: blur(16px);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 24px; text-align: center; z-index: 100; border-radius: 20px;
+  padding: 24px; text-align: center; z-index: 100; border-radius: 22px;
   animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 @keyframes popIn { from { opacity: 0; transform: scale(0.75); } to { opacity: 1; transform: scale(1); } }
-.vic-title { font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #ffd700, #ff9900); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
-.vic-sub { font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 700; margin-bottom: 18px; }
-.vic-av { width: 80px; height: 80px; border-radius: 50%; border: 3.5px solid #ffd700; box-shadow: 0 0 30px #ffd700; object-fit: cover; margin-bottom: 12px; }
-.vic-name { font-size: 1.3rem; font-weight: 900; color: #fff; }
+.vic-title { font-size: 1.9rem; font-weight: 900; background: linear-gradient(135deg, #00f3ff, #b026ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+.vic-sub { font-size: 0.85rem; color: rgba(255,255,255,0.65); font-weight: 700; margin-bottom: 18px; }
+.vic-av { width: 84px; height: 84px; border-radius: 50%; border: 3.5px solid #00f3ff; box-shadow: 0 0 35px #00f3ff; object-fit: cover; margin-bottom: 12px; }
+.vic-name { font-size: 1.35rem; font-weight: 900; color: #fff; }
 
 .err-msg { background: rgba(255,59,92,0.9); color: #fff; padding: 20px; border-radius: 14px; font-weight: 800; text-align: center; }
 </style>
@@ -151,14 +151,14 @@ function fmt(s) {
 
 function getAvatar(p) {
   if (p.av && !p.av.includes('dicebear') && !p.av.includes('unavatar')) return p.av;
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000&font-size=0.55&bold=true`;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=6b11ff&color=fff&font-size=0.55&bold=true`;
 }
 
 function render(s) {
-  const c = s.color || '#ffd700';
+  const c = s.color || '#00f3ff';
   const box = document.getElementById('ov-box');
   box.style.borderColor = c;
-  box.style.boxShadow = `0 0 35px ${c}38`;
+  box.style.boxShadow = `0 0 35px ${c}40`;
 
   document.getElementById('ov-vouch').textContent = s.vouches_val || '100 VOUCHES';
 
@@ -196,7 +196,7 @@ function render(s) {
       document.getElementById('vic-content').innerHTML = `
         <div style="display:flex;gap:18px;align-items:center;justify-content:center;margin-bottom:12px">
           <div><img class="vic-av" src="${getAvatar(top[0])}"><div class="vic-name">@${esc(top[0].u)}</div></div>
-          <div style="font-size:1.6rem;font-weight:900;color:#ffd700">VS</div>
+          <div style="font-size:1.6rem;font-weight:900;color:#00f3ff">VS</div>
           <div><img class="vic-av" src="${getAvatar(top[1])}"><div class="vic-name">@${esc(top[1].u)}</div></div>
         </div>`;
     } else if (top[0].coins > 0) {
@@ -217,7 +217,7 @@ function render(s) {
     return p ? `<div class="rrow ${cls}">
       <span class="medal">${medals[i]}</span>
       <div class="rav-wrap">
-        <img class="rav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000'">
+        <img class="rav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=6b11ff&color=fff'">
         <div class="rbadge">${i+1}</div>
       </div>
       <div class="rname">${esc(p.name || p.nick || p.u)}</div>
