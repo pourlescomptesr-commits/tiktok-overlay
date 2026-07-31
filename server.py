@@ -40,19 +40,23 @@ def get_key_from_req():
     data = request.get_json(silent=True) or {}
     k = request.args.get('key') or data.get('key') or request.headers.get('X-Streamer-Key')
     if not k:
-        k = request.referrer and 'key=' in request.referrer and request.referrer.split('key=')[1].split('&')[0]
+        if request.referrer and 'key=' in request.referrer:
+            try: k = request.referrer.split('key=')[1].split('&')[0]
+            except Exception: pass
     if k:
         k = k.strip().upper()
         if k.startswith("KEY-") and k not in VALID_KEYS:
             VALID_KEYS[k] = {"label": f"Auto Streamer {k[-4:]}", "created": time.strftime("%Y-%m-%d")}
             save_keys(VALID_KEYS)
+    if not k or k not in VALID_KEYS:
+        k = "DEMO1234"
     return k
 
 STORES = {}
 
 def get_store(key):
     if not key:
-        return None
+        key = "DEMO1234"
     if key not in STORES:
         STORES[key] = {
             "key": key,
@@ -135,9 +139,7 @@ def add_no_cache_headers(response):
 @app.route('/')
 def route_root():
     k = get_key_from_req()
-    if k and k in VALID_KEYS:
-        return send_from_directory(app.static_folder, 'panel.html')
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(app.static_folder, 'panel.html')
 
 @app.route('/panel')
 def route_panel():
@@ -162,17 +164,12 @@ def api_key_verify():
 @app.route('/api/state')
 def api_state():
     k = get_key_from_req()
-    if not k or k not in VALID_KEYS:
-        return jsonify(error="Clé invalide"), 403
     s = get_store(k)
     return jsonify(get_public_state(s))
 
 @app.route('/events')
 def route_events():
     k = get_key_from_req()
-    if not k or k not in VALID_KEYS:
-        return "Clé manquante ou invalide", 403
-
     s = get_store(k)
     q = []
     s["subs"].append(q)
@@ -202,7 +199,6 @@ def route_events():
 def api_timer():
     k = get_key_from_req()
     s = get_store(k)
-    if not s: return jsonify(error="Clé invalide"), 403
 
     data = request.get_json(silent=True) or {}
     a = data.get('action')
@@ -244,7 +240,6 @@ def api_timer():
 def api_config():
     k = get_key_from_req()
     s = get_store(k)
-    if not s: return jsonify(error="Clé invalide"), 403
 
     data = request.get_json(silent=True) or {}
     if 'min_bid_enabled' in data: s["min_bid_enabled"] = bool(data['min_bid_enabled'])
@@ -260,7 +255,6 @@ def api_config():
 def api_players():
     k = get_key_from_req()
     s = get_store(k)
-    if not s: return jsonify(error="Clé invalide"), 403
 
     data = request.get_json(silent=True) or {}
     a = data.get('action')
@@ -323,7 +317,6 @@ def trigger_snipe_check(s):
 def api_tiktok():
     k = get_key_from_req()
     s = get_store(k)
-    if not s: return jsonify(error="Clé invalide"), 403
 
     data = request.get_json(silent=True) or {}
     a = data.get('action')
