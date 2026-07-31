@@ -1,120 +1,121 @@
-import os, sys, time, json, queue, threading, urllib.request, re, asyncio, subprocess
-from flask import Flask, request, jsonify, Response, send_from_directory
+import os, time, json, subprocess, sys
+from flask import Flask, request, jsonify, Response, send_from_directory, render_template_string
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__, static_folder=os.path.join(BASE_DIR, 'public'), static_url_path='')
 
-app = Flask(__name__, static_folder='public', static_url_path='')
-
-LOCK = threading.Lock()
-STATES = {}
-SSE_QUEUES = {}
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Grenouille123")
 KEYS_FILE = os.path.join(BASE_DIR, 'keys.json')
 
 def load_keys():
-    try:
-        if os.path.exists(KEYS_FILE):
+    if os.path.exists(KEYS_FILE):
+        try:
             with open(KEYS_FILE, 'r', encoding='utf-8') as f:
                 return json.load(f)
-    except Exception as e:
-        print(f"Erreur chargement keys.json: {e}")
+        except Exception:
+            pass
     return {
-        "DEMO1234": {"label": "Demo", "created": "2026-01-01"},
-        "KEY-5792224B": {"label": "Client 1", "created": "2026-07-30"},
-        "KEY-AA860585": {"label": "Client 2", "created": "2026-07-30"}
+        "DEMO1234": {"label": "Compte Démo Gratuit", "created": "2026-07-30"},
+        "KEY-5792224B": {"label": "Client #1", "created": "2026-07-30"},
+        "KEY-AA860585": {"label": "Client #2", "created": "2026-07-30"},
+        "KEY-718019E8": {"label": "Client #3", "created": "2026-07-30"}
     }
 
-def save_keys(keys_dict):
+def save_keys(keys):
     try:
         with open(KEYS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(keys_dict, f, indent=2, ensure_ascii=False)
+            json.dump(keys, f, indent=2, ensure_ascii=False)
     except Exception as e:
-        print(f"Erreur sauvegarde keys.json: {e}")
+        print(f"[Save Keys Error] {e}", flush=True)
 
 VALID_KEYS = load_keys()
 
-def default_state():
-    return {
-        "timer_dur": 60,
-        "timer_rem": 60,
-        "timer_on": False,
-        "min_bid_enabled": False,
-        "min_bid_val": 1,
-        "snipe_dur": 10,
-        "snipe_rem": 10,
-        "snipe_on": False,
-        "color": "#ffd700",
-        "tiktok": "off",
-        "tiktok_user": "",
-        "players": []
-    }
-
-def get_or_create_state(key):
-    with LOCK:
-        if key not in STATES:
-            STATES[key] = default_state()
-            SSE_QUEUES[key] = []
-        return STATES[key]
-
-def push_key(key):
-    with LOCK:
-        if key in STATES and key in SSE_QUEUES:
-            data = json.dumps(STATES[key])
-            for q in list(SSE_QUEUES[key]):
-                try: q.put_nowait(data)
-                except: pass
-
-def global_timer_loop():
-    last_time = time.time()
-    while True:
-        time.sleep(0.1)
-        now = time.time()
-        dt = now - last_time
-        last_time = now
-
-        with LOCK:
-            keys_to_push = set()
-            for key, s in STATES.items():
-                changed = False
-
-                if s["timer_on"]:
-                    s["timer_rem"] -= dt
-                    if s["timer_rem"] <= 0:
-                        s["timer_rem"] = 0
-                        s["timer_on"] = False
-                        s["snipe_on"] = False
-                        s["snipe_rem"] = s["snipe_dur"]
-                    changed = True
-
-                if s["snipe_on"]:
-                    s["snipe_rem"] -= dt
-                    if s["snipe_rem"] <= 0:
-                        s["snipe_rem"] = 0
-                        s["snipe_on"] = False
-                    changed = True
-
-                if changed:
-                    keys_to_push.add(key)
-
-        for k in keys_to_push:
-            push_key(k)
-
-threading.Thread(target=global_timer_loop, daemon=True).start()
-
-def trigger_snipe_key(s):
-    if s["timer_on"] and s["timer_rem"] <= s["snipe_dur"]:
-        s["snipe_on"] = True
-        s["snipe_rem"] = s["snipe_dur"]
-        s["timer_rem"] = s["snipe_dur"]
-
 def get_key_from_req():
     k = request.args.get('key') or (request.json or {}).get('key') or request.headers.get('X-Streamer-Key')
+    if not k:
+        k = request.referrer and 'key=' in request.referrer and request.referrer.split('key=')[1].split('&')[0]
     if k:
-        k = k.strip().upper().replace(' ', '')
-        if k in VALID_KEYS or k.startswith("KEY-") or k.startswith("DEMO"):
-            if k not in VALID_KEYS:
-                VALID_KEYS[k] = {"label": "Auto-registered", "created": time.strftime("%Y-%m-%d")}
-            return k
-    return None
+        k = k.strip().upper()
+        if k.startswith("KEY-") and k not in VALID_KEYS:
+            VALID_KEYS[k] = {"label": f"Auto Streamer {k[-4:]}", "created": time.strftime("%Y-%m-%d")}
+            save_keys(VALID_KEYS)
+    return k
+
+STORES = {}
+
+def get_store(key):
+    if not key:
+        return None
+    if key not in STORES:
+        STORES[key] = {
+            "key": key,
+            "timer_dur": 60,
+            "snipe_dur": 10,
+            "timer_rem": 60,
+            "snipe_rem": 10,
+            "timer_on": False,
+            "snipe_on": False,
+            "last_t": time.time(),
+            "min_bid_enabled": False,
+            "min_bid_val": 1,
+            "color": "#ffd700",
+            "tiktok": "off",
+            "tiktok_user": "",
+            "cf_url": "",
+            "proc": None,
+            "players": [],
+            "subs": []
+        }
+    return STORES[key]
+
+def update_timer(s):
+    now = time.time()
+    elapsed = now - s["last_t"]
+    s["last_t"] = now
+
+    if s["snipe_on"]:
+        s["snipe_rem"] -= elapsed
+        if s["snipe_rem"] <= 0:
+            s["snipe_rem"] = 0
+            s["snipe_on"] = False
+            s["timer_on"] = False
+    elif s["timer_on"]:
+        s["timer_rem"] -= elapsed
+        if s["timer_rem"] <= 0:
+            s["timer_rem"] = 0
+            s["timer_on"] = False
+
+def notify(s):
+    payload = json.dumps(get_public_state(s))
+    msg = f"data: {payload}\n\n"
+    dead = []
+    for q in s["subs"]:
+        try:
+            q.append(msg)
+        except Exception:
+            dead.append(q)
+    for d in dead:
+        if d in s["subs"]:
+            s["subs"].remove(d)
+
+def get_public_state(s):
+    update_timer(s)
+    return {
+        "key": s["key"],
+        "timer_dur": s["timer_dur"],
+        "snipe_dur": s["snipe_dur"],
+        "timer_rem": max(0, round(s["timer_rem"], 1)),
+        "snipe_rem": max(0, round(s["snipe_rem"], 1)),
+        "timer_on": s["timer_on"],
+        "snipe_on": s["snipe_on"],
+        "min_bid_enabled": s["min_bid_enabled"],
+        "min_bid_val": s["min_bid_val"],
+        "color": s["color"],
+        "tiktok": s["tiktok"],
+        "tiktok_user": s["tiktok_user"],
+        "cf_url": s["cf_url"],
+        "players": sorted(s["players"], key=lambda x: x["coins"], reverse=True)
+    }
 
 @app.after_request
 def add_no_cache_headers(response):
@@ -125,48 +126,64 @@ def add_no_cache_headers(response):
     return response
 
 @app.route('/')
-def route_home():
-    return send_from_directory('public', 'panel.html')
+def route_root():
+    k = get_key_from_req()
+    if k and k in VALID_KEYS:
+        return send_from_directory(app.static_folder, 'panel.html')
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/panel')
 def route_panel():
-    return send_from_directory('public', 'panel.html')
+    return send_from_directory(app.static_folder, 'panel.html')
 
 @app.route('/overlay')
 def route_overlay():
-    return send_from_directory('public', 'overlay.html')
+    return send_from_directory(app.static_folder, 'overlay.html')
 
 @app.route('/admin')
 def route_admin():
-    return send_from_directory('public', 'admin.html')
+    return send_from_directory(app.static_folder, 'admin.html')
+
+@app.route('/api/key/verify', methods=['POST'])
+def api_key_verify():
+    data = request.json or {}
+    k = (data.get('key') or '').strip().upper()
+    if k in VALID_KEYS:
+        return jsonify(valid=True, label=VALID_KEYS[k].get('label', 'Streamer'))
+    return jsonify(valid=False, error="Clé invalide ou expirée"), 403
+
+@app.route('/api/state')
+def api_state():
+    k = get_key_from_req()
+    if not k or k not in VALID_KEYS:
+        return jsonify(error="Clé invalide"), 403
+    s = get_store(k)
+    return jsonify(get_public_state(s))
 
 @app.route('/events')
 def route_events():
-    key = get_key_from_req()
-    if not key:
-        return "Clé non autorisée", 401
-    s = get_or_create_state(key)
+    k = get_key_from_req()
+    if not k or k not in VALID_KEYS:
+        return "Clé manquante ou invalide", 403
+
+    s = get_store(k)
+    q = []
+    s["subs"].append(q)
 
     def gen():
-        q = queue.Queue(maxsize=50)
-        with LOCK:
-            if key in SSE_QUEUES:
-                SSE_QUEUES[key].append(q)
         try:
-            with LOCK:
-                init_data = json.dumps(STATES[key])
-            yield f"data: {init_data}\n\n"
-
+            q.append(f"data: {json.dumps(get_public_state(s))}\n\n")
             while True:
-                try:
-                    msg = q.get(timeout=20)
-                    yield f"data: {msg}\n\n"
-                except queue.Empty:
-                    yield ": keep-alive\n\n"
-        finally:
-            with LOCK:
-                if key in SSE_QUEUES and q in SSE_QUEUES[key]:
-                    SSE_QUEUES[key].remove(q)
+                if q:
+                    msg = q.pop(0)
+                    yield msg
+                else:
+                    time.sleep(0.15)
+                    update_timer(s)
+                    q.append(f"data: {json.dumps(get_public_state(s))}\n\n")
+        except GeneratorExit:
+            if q in s["subs"]:
+                s["subs"].remove(q)
 
     return Response(gen(), mimetype='text/event-stream', headers={
         'Cache-Control': 'no-cache',
@@ -174,205 +191,263 @@ def route_events():
         'Connection': 'keep-alive'
     })
 
-@app.route('/api/state')
-def api_state():
-    key = get_key_from_req()
-    if not key: return jsonify(ok=False, error="Clé non autorisée"), 401
-    s = get_or_create_state(key)
-    with LOCK:
-        return jsonify(ok=True, state=s)
-
 @app.route('/api/timer', methods=['POST'])
 def api_timer():
-    key = get_key_from_req()
-    if not key: return jsonify(ok=False, error="Clé non autorisée"), 401
-    s = get_or_create_state(key)
-    a = (request.json or {}).get('action')
+    k = get_key_from_req()
+    s = get_store(k)
+    if not s: return jsonify(error="Clé invalide"), 403
 
-    with LOCK:
-        if a == 'start':
-            s["timer_on"] = True
-        elif a == 'pause':
-            s["timer_on"] = False
-            s["snipe_on"] = False
-        elif a == 'reset':
-            s["timer_on"] = False
-            s["snipe_on"] = False
-            s["timer_rem"] = s["timer_dur"]
-            s["snipe_rem"] = s["snipe_dur"]
-        elif a == 'set_dur':
-            v = max(5, int((request.json or {}).get('val', 60)))
-            s["timer_dur"] = v
-            s["timer_rem"] = v
-        elif a == 'add_time':
-            sec = int((request.json or {}).get('sec', 30))
-            s["timer_rem"] += sec
+    data = request.json or {}
+    a = data.get('action')
+    dur = data.get('duration')
+    snipe = data.get('snipe_delay')
 
-    push_key(key)
-    return jsonify(ok=True)
+    if dur is not None:
+        try:
+            d = max(5, int(dur))
+            s["timer_dur"] = d
+            if not s["timer_on"] and not s["snipe_on"]:
+                s["timer_rem"] = d
+        except Exception: pass
+
+    if snipe is not None:
+        try:
+            s["snipe_dur"] = max(0, int(snipe))
+        except Exception: pass
+
+    s["last_t"] = time.time()
+
+    if a == 'start':
+        s["timer_on"] = True
+        s["snipe_on"] = False
+        if s["timer_rem"] <= 0: s["timer_rem"] = s["timer_dur"]
+    elif a == 'pause':
+        s["timer_on"] = False
+        s["snipe_on"] = False
+    elif a == 'reset':
+        s["timer_on"] = False
+        s["snipe_on"] = False
+        s["timer_rem"] = s["timer_dur"]
+        s["snipe_rem"] = s["snipe_dur"]
+
+    notify(s)
+    return jsonify(ok=True, state=get_public_state(s))
 
 @app.route('/api/config', methods=['POST'])
 def api_config():
-    key = get_key_from_req()
-    if not key: return jsonify(ok=False, error="Clé non autorisée"), 401
-    s = get_or_create_state(key)
-    d = request.json or {}
-    with LOCK:
-        if 'min_bid_enabled' in d: s['min_bid_enabled'] = bool(d['min_bid_enabled'])
-        if 'min_bid_val' in d: s['min_bid_val'] = max(0, int(d['min_bid_val']))
-    push_key(key)
-    return jsonify(ok=True)
+    k = get_key_from_req()
+    s = get_store(k)
+    if not s: return jsonify(error="Clé invalide"), 403
 
-@app.route('/api/color', methods=['POST'])
-def api_color():
-    key = get_key_from_req()
-    if not key: return jsonify(ok=False, error="Clé non autorisée"), 401
-    s = get_or_create_state(key)
-    with LOCK: s["color"] = (request.json or {}).get('color','#ffd700')
-    push_key(key)
-    return jsonify(ok=True)
+    data = request.json or {}
+    if 'min_bid_enabled' in data: s["min_bid_enabled"] = bool(data['min_bid_enabled'])
+    if 'min_bid_val' in data:
+        try: s["min_bid_val"] = max(1, int(data['min_bid_val']))
+        except Exception: pass
+    if 'color' in data: s["color"] = str(data['color'])
 
-TIKTOK_WORKERS = {}
+    notify(s)
+    return jsonify(ok=True, state=get_public_state(s))
 
-def stop_tiktok_worker_for_key(key):
-    with LOCK:
-        p = TIKTOK_WORKERS.pop(key, None)
-    if p:
-        try: p.kill()
-        except: pass
+@app.route('/api/players', methods=['POST'])
+def api_players():
+    k = get_key_from_req()
+    s = get_store(k)
+    if not s: return jsonify(error="Clé invalide"), 403
+
+    data = request.json or {}
+    a = data.get('action')
+
+    if a == 'add':
+        u = str(data.get('user', '')).strip().lstrip('@')
+        coins = int(data.get('coins', 100))
+        if u:
+            ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
+            if ex:
+                ex["coins"] += coins
+            else:
+                s["players"].append({
+                    "u": u,
+                    "nick": u,
+                    "av": f"https://api.dicebear.com/7.x/initials/svg?seed={u}",
+                    "coins": coins
+                })
+            trigger_snipe_check(s)
+
+    elif a == 'remove':
+        u = str(data.get('user', '')).strip().lstrip('@')
+        s["players"] = [p for p in s["players"] if p["u"].lower() != u.lower()]
+
+    elif a == 'clear':
+        s["players"] = []
+
+    elif a == 'reset_coins':
+        for p in s["players"]: p["coins"] = 0
+
+    elif a == 'swap_top2':
+        s["players"].sort(key=lambda x: x["coins"], reverse=True)
+        if len(s["players"]) >= 2:
+            s["players"][0]["coins"], s["players"][1]["coins"] = s["players"][1]["coins"], s["players"][0]["coins"]
+
+    elif a == 'equalize_top2':
+        s["players"].sort(key=lambda x: x["coins"], reverse=True)
+        if len(s["players"]) >= 2:
+            top_val = s["players"][0]["coins"]
+            s["players"][1]["coins"] = top_val
+
+    elif a == 'equalize_top3':
+        s["players"].sort(key=lambda x: x["coins"], reverse=True)
+        if len(s["players"]) >= 3:
+            top_val = s["players"][0]["coins"]
+            s["players"][1]["coins"] = top_val
+            s["players"][2]["coins"] = top_val
+
+    notify(s)
+    return jsonify(ok=True, state=get_public_state(s))
+
+def trigger_snipe_check(s):
+    if s["timer_on"] and not s["snipe_on"]:
+        if s["timer_rem"] <= s["snipe_dur"]:
+            s["snipe_on"] = True
+            s["snipe_rem"] = s["snipe_dur"]
+            s["timer_on"] = False
 
 @app.route('/api/tiktok', methods=['POST'])
 def api_tiktok():
-    key = get_key_from_req()
-    if not key: return jsonify(ok=False, error="Clé non autorisée"), 401
-    s = get_or_create_state(key)
-    a = (request.json or {}).get('action')
+    k = get_key_from_req()
+    s = get_store(k)
+    if not s: return jsonify(error="Clé invalide"), 403
+
+    data = request.json or {}
+    a = data.get('action')
+
     if a == 'connect':
-        u = (request.json or {}).get('user','').strip().lstrip('@')
-        if not u: return jsonify(ok=False)
-        stop_tiktok_worker_for_key(key)
-        with LOCK:
-            s["tiktok"] = "connecting"
-            s["tiktok_user"] = u
-        push_key(key)
-        port = str(os.environ.get('PORT', 3000))
-        p = subprocess.Popen([sys.executable, os.path.join(BASE_DIR, 'tiktok_worker.py'), key, u, port], cwd=BASE_DIR)
-        with LOCK:
-            TIKTOK_WORKERS[key] = p
+        u = str(data.get('user', '')).strip().lstrip('@')
+        if not u:
+            return jsonify(error="Nom d'utilisateur requis"), 400
+
+        if s["proc"] and s["proc"].poll() is None:
+            try: s["proc"].terminate()
+            except Exception: pass
+
+        s["tiktok"] = "connecting"
+        s["tiktok_user"] = u
+        notify(s)
+
+        port = str(os.environ.get('PORT', 8080))
+        try:
+            p = subprocess.Popen([sys.executable, os.path.join(BASE_DIR, 'tiktok_worker.py'), k, u, port], cwd=BASE_DIR)
+            s["proc"] = p
+        except Exception as ex:
+            print(f"[Popen Error] {ex}", flush=True)
+
     elif a == 'disconnect':
-        stop_tiktok_worker_for_key(key)
-        with LOCK:
-            s["tiktok"] = "off"
-            s["tiktok_user"] = ""
-        push_key(key)
-    return jsonify(ok=True)
+        if s["proc"] and s["proc"].poll() is None:
+            try: s["proc"].terminate()
+            except Exception: pass
+        s["proc"] = None
+        s["tiktok"] = "off"
+        s["tiktok_user"] = ""
+        notify(s)
+
+    return jsonify(ok=True, state=get_public_state(s))
 
 @app.route('/api/internal/tiktok_status', methods=['POST'])
 def api_internal_tiktok_status():
-    d = request.json or {}
-    key = d.get('key')
-    if not key: return jsonify(ok=False)
-    with LOCK:
-        s = get_or_create_state(key)
-        s["tiktok"] = d.get('status', 'off')
-        s["tiktok_user"] = d.get('user', '')
-    push_key(key)
-    return jsonify(ok=True)
+    data = request.json or {}
+    k = data.get('key')
+    st = data.get('status')
+    u = data.get('user', '')
+    if k and k in STORES:
+        s = STORES[k]
+        s["tiktok"] = st
+        if st == 'on': s["tiktok_user"] = u
+        elif st == 'off': s["tiktok_user"] = ''
+        notify(s)
+        return jsonify(ok=True)
+    return jsonify(error="Store introuvable"), 404
 
 @app.route('/api/internal/gift', methods=['POST'])
 def api_internal_gift():
-    d = request.json or {}
-    key = d.get('key')
-    if not key: return jsonify(ok=False)
-    u = d.get('u','')
-    if not u: return jsonify(ok=False)
-    nick = d.get('nick', u)
-    av = d.get('av', '')
-    total_coins = int(d.get('coins', 1))
-    with LOCK:
-        s = get_or_create_state(key)
-        found = False
-        for p in s["players"]:
-            if p["u"].lower() == u.lower():
-                p["coins"] += total_coins
-                p["name"] = nick
-                found = True
-                break
-        if not found:
-            s["players"].append({"u": u, "name": nick, "av": av, "coins": total_coins})
-        s["players"].sort(key=lambda x: x["coins"], reverse=True)
-        trigger_snipe_key(s)
-    push_key(key)
+    data = request.json or {}
+    k = data.get('key')
+    if not k or k not in STORES:
+        return jsonify(error="Store introuvable"), 404
+
+    s = STORES[k]
+    u = data.get('u')
+    nick = data.get('nick')
+    av = data.get('av')
+    coins = data.get('coins', 1)
+
+    if s["min_bid_enabled"] and coins < s["min_bid_val"]:
+        return jsonify(ok=True, ignored="sous le minimum")
+
+    ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
+    if ex:
+        ex["coins"] += coins
+        if nick: ex["nick"] = nick
+        if av: ex["av"] = av
+    else:
+        s["players"].append({
+            "u": u, "nick": nick or u, "av": av or f"https://api.dicebear.com/7.x/initials/svg?seed={u}",
+            "coins": coins
+        })
+
+    trigger_snipe_check(s)
+    notify(s)
     return jsonify(ok=True)
 
-@app.route('/api/player', methods=['POST'])
-def api_player():
-    key = get_key_from_req()
-    if not key: return jsonify(ok=False, error="Clé non autorisée"), 401
-    s = get_or_create_state(key)
-    d = request.json or {}
-    a = d.get('action')
-
-    with LOCK:
-        if a == 'add':
-            u = (d.get('user') or '').strip().lstrip('@')
-            c = max(1, int(d.get('coins', 10)))
-            if u:
-                found = False
-                for p in s["players"]:
-                    if p["u"].lower() == u.lower():
-                        p["coins"] += c
-                        found = True
-                        break
-                if not found:
-                    s["players"].append({
-                        "u": u,
-                        "name": u,
-                        "av": f"https://api.dicebear.com/7.x/initials/svg?seed={u}",
-                        "coins": c
-                    })
-                s["players"].sort(key=lambda x: x["coins"], reverse=True)
-                trigger_snipe_key(s)
-        elif a == 'remove':
-            idx = d.get('idx')
-            u_del = (d.get('user') or '').strip().lower()
-            if idx is not None and isinstance(idx, int) and 0 <= idx < len(s["players"]):
-                s["players"].pop(idx)
-            elif u_del:
-                s["players"] = [p for p in s["players"] if p["u"].lower() != u_del]
-        elif a == 'clear':
-            s["players"] = []
-
-    push_key(key)
-    return jsonify(ok=True)
+@app.route('/api/admin/login', methods=['POST'])
+def api_admin_login():
+    data = request.json or {}
+    pwd = data.get('password', '')
+    if pwd == ADMIN_PASSWORD:
+        return jsonify(ok=True, token="admin-authenticated-token")
+    return jsonify(ok=False, error="Mot de passe incorrect"), 401
 
 @app.route('/api/admin/keys', methods=['GET', 'POST'])
 def api_admin_keys():
-    pwd = request.headers.get('X-Admin-Password') or request.args.get('pwd') or (request.json or {}).get('pwd')
-    if pwd != "Grenouille123":
-        return jsonify(ok=False, error="Mot de passe admin incorrect"), 403
+    data = request.json or {}
+    pwd = data.get('password', '') or request.headers.get('X-Admin-Password')
+    if pwd != ADMIN_PASSWORD:
+        return jsonify(error="Non autorisé"), 401
+    return jsonify(keys=VALID_KEYS)
 
-    if request.method == 'GET':
-        return jsonify(ok=True, keys=VALID_KEYS)
+@app.route('/api/admin/keys/create', methods=['POST'])
+def api_admin_keys_create():
+    data = request.json or {}
+    pwd = data.get('password', '') or request.headers.get('X-Admin-Password')
+    if pwd != ADMIN_PASSWORD:
+        return jsonify(error="Non autorisé"), 401
 
-    a = (request.json or {}).get('action')
-    if a == 'create':
-        import uuid
-        new_k = "KEY-" + str(uuid.uuid4())[:8].upper()
-        lbl = (request.json or {}).get('label', 'Nouveau Client')
-        VALID_KEYS[new_k] = {"label": lbl, "created": time.strftime("%Y-%m-%d")}
+    import uuid
+    new_k = "KEY-" + str(uuid.uuid4())[:8].upper()
+    lbl = data.get('label', 'Nouveau Client')
+    VALID_KEYS[new_k] = {"label": lbl, "created": time.strftime("%Y-%m-%d")}
+    save_keys(VALID_KEYS)
+    return jsonify(ok=True, key=new_k)
+
+@app.route('/api/admin/keys/delete', methods=['POST'])
+def api_admin_keys_delete():
+    data = request.json or {}
+    pwd = data.get('password', '') or request.headers.get('X-Admin-Password')
+    if pwd != ADMIN_PASSWORD:
+        return jsonify(error="Non autorisé"), 401
+
+    k_del = data.get('key')
+    if k_del in VALID_KEYS:
+        del VALID_KEYS[k_del]
         save_keys(VALID_KEYS)
-        return jsonify(ok=True, key=new_k)
-    elif a == 'delete':
-        k_del = (request.json or {}).get('key')
-        if k_del in VALID_KEYS:
-            del VALID_KEYS[k_del]
-            save_keys(VALID_KEYS)
-        return jsonify(ok=True)
-
-    return jsonify(ok=False, error="Action invalide"), 400
+    return jsonify(ok=True)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 3000))
-    print(f" Serveur démarré sur le port {port}")
-    app.run(host='0.0.0.0', port=port, debug=False)
+    port = int(os.environ.get('PORT', 8080))
+    try:
+        from gevent.pywsgi import WSGIServer
+        print(f"🚀 Serveur Production Gevent WSGI démarré sur le port {port}", flush=True)
+        http_server = WSGIServer(('0.0.0.0', port), app)
+        http_server.serve_forever()
+    except Exception as ex:
+        print(f" Serveur Flask démarré sur le port {port} ({ex})", flush=True)
+        app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
