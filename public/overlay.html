@@ -2,54 +2,66 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Overlay Stream — TikTok Auction Live</title>
+<title>Overlay Stream Pro — TikTok Auction Live</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100vw;height:100vh;background:transparent;display:flex;justify-content:center;align-items:center;overflow:hidden}
 
 .ov-card{
-  width:315px;background:rgba(7,8,15,.95);border:2.5px solid #ffd700;
-  border-radius:20px;padding:15px;display:flex;flex-direction:column;align-items:center;gap:10px;
-  box-shadow:0 0 30px rgba(255,215,0,.25);transition:border-color .3s,box-shadow .3s;
-  font-family:'Outfit',sans-serif;color:#fff;
+  width:320px;background:rgba(7,8,15,.96);border:2.5px solid #ffd700;
+  border-radius:22px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;
+  box-shadow:0 0 35px rgba(255,215,0,.28);transition:border-color .3s,box-shadow .3s;
+  font-family:'Outfit',sans-serif;color:#fff;position:relative;overflow:hidden;
 }
-.ov-top{background:rgba(0,0,0,.85);border:1.5px solid #ffd700;border-radius:30px;
-  padding:5px 18px;font-size:.82rem;font-weight:800;display:flex;align-items:center;gap:7px;transition:border-color .3s;letter-spacing:1px}
+.ov-top{background:rgba(0,0,0,.88);border:1.5px solid #ffd700;border-radius:30px;
+  padding:5px 20px;font-size:.82rem;font-weight:800;display:flex;align-items:center;gap:7px;transition:border-color .3s;letter-spacing:1px}
 .ov-mid{display:flex;gap:7px;width:100%;justify-content:center}
 .ov-pill{background:rgba(0,0,0,.85);border-radius:30px;padding:4px 13px;font-size:.7rem;font-weight:800;display:flex;align-items:center;gap:4px}
 .ov-pill.min{border:1.5px solid #ffd700;transition:border-color .3s}
 .ov-pill.snipe{border:1.5px solid rgba(255,255,255,.15)}
-.ov-pill.snipe.hot{border-color:#ff3b5c}
+.ov-pill.snipe.hot{border-color:#ff3b5c;box-shadow:0 0 14px rgba(255,59,92,0.6)}
 .ov-pill .hl{color:#ffd700;transition:color .3s}
-.ov-pill.snipe .hl{background:rgba(255,255,255,.1);padding:1px 4px;border-radius:4px;font-size:.66rem}
-.ov-pill.snipe.hot .hl{background:#ff3b5c}
-.ov-timer{font-family:'Share Tech Mono',monospace;font-size:3.2rem;color:#39ff14;
-  text-shadow:0 0 16px rgba(57,255,20,.55);letter-spacing:2px;line-height:1;transition:color .3s}
-.ov-timer.warn{color:#ffaa00;text-shadow:0 0 16px rgba(255,170,0,.7)}
-.ov-timer.snipe{color:#ff3b5c;text-shadow:0 0 16px rgba(255,59,92,.7);animation:blink .8s ease infinite alternate}
-@keyframes blink{from{opacity:1}to{opacity:.45}}
+.ov-pill.snipe .hl{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:.66rem}
+.ov-pill.snipe.hot .hl{background:#ff3b5c;color:#fff}
+.ov-timer{font-family:'Share Tech Mono',monospace;font-size:3.3rem;color:#39ff14;
+  text-shadow:0 0 18px rgba(57,255,20,.6);letter-spacing:2px;line-height:1;transition:color .3s}
+.ov-timer.warn{color:#ffaa00;text-shadow:0 0 18px rgba(255,170,0,.7)}
+.ov-timer.snipe{color:#ff3b5c;text-shadow:0 0 24px rgba(255,59,92,.85);animation:blink .8s ease infinite alternate}
+@keyframes blink{from{opacity:1}to{opacity:.4}}
 
 .ranks{width:100%;display:flex;flex-direction:column;gap:7px}
-.rrow{background:rgba(0,0,0,.68);border:1px solid rgba(255,255,255,.06);
-  border-radius:11px;padding:7px 11px;display:flex;align-items:center;gap:9px;height:48px;
+.rrow{background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;padding:7px 11px;display:flex;align-items:center;gap:9px;height:48px;
   transition:border-color .3s,box-shadow .3s}
-.rrow.r1{border-color:rgba(255,215,0,.4);box-shadow:0 0 10px rgba(255,215,0,.12)}
-.rrow.r2{border-color:rgba(180,180,190,.28)}
-.rrow.r3{border-color:rgba(205,127,50,.28)}
-.rbadge{width:23px;height:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:.7rem;font-weight:900;flex-shrink:0;background:rgba(255,255,255,.07);color:rgba(255,255,255,.35)}
+.rrow.r1{border-color:rgba(255,215,0,.45);box-shadow:0 0 12px rgba(255,215,0,.15)}
+.rrow.r2{border-color:rgba(180,180,190,.3)}
+.rrow.r3{border-color:rgba(205,127,50,.3)}
+.rbadge{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:900;flex-shrink:0;background:rgba(255,255,255,.07);color:rgba(255,255,255,.35)}
 .r1 .rbadge{background:#ffd700;color:#000;box-shadow:0 0 8px rgba(255,215,0,.5)}
 .r2 .rbadge{background:#b4b4be;color:#000}
 .r3 .rbadge{background:#cd7f32;color:#fff}
-.rav{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.13);flex-shrink:0;background:rgba(255,255,255,.04)}
-.rname{flex:1;font-size:.82rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rcoins{font-size:.85rem;font-weight:800;display:flex;align-items:center;gap:5px}
+.rav{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.15);flex-shrink:0;background:rgba(255,255,255,.04)}
+.rname{flex:1;font-size:.84rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rcoins{font-size:.88rem;font-weight:900;display:flex;align-items:center;gap:5px}
 .ddots{display:flex;gap:3px}
 .dd{width:6px;height:6px;border-radius:50%;background:#ffd700;box-shadow:0 0 4px #ffd700}
 
-.ov-bot{background:rgba(0,0,0,.85);border:1.5px solid rgba(127,0,255,.4);
-  border-radius:20px;padding:4px 14px;font-size:.72rem;font-weight:700;display:flex;align-items:center;gap:6px}
+.ov-bot{background:rgba(0,0,0,.88);border:1.5px solid rgba(127,0,255,.45);
+  border-radius:20px;padding:4px 16px;font-size:.74rem;font-weight:800;display:flex;align-items:center;gap:6px}
+
+.victory-modal {
+  position: absolute; inset: 0; background: rgba(7, 8, 15, 0.96); backdrop-filter: blur(14px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px; text-align: center; z-index: 100; border-radius: 20px;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popIn { from { opacity: 0; transform: scale(0.75); } to { opacity: 1; transform: scale(1); } }
+.vic-title { font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #ffd700, #ff9900); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+.vic-sub { font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 700; margin-bottom: 18px; }
+.vic-av { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #ffd700; box-shadow: 0 0 30px #ffd700; object-fit: cover; margin-bottom: 12px; }
+.vic-name { font-size: 1.3rem; font-weight: 900; color: #fff; }
 
 .err-msg{background:rgba(255,59,92,0.9);color:#fff;padding:20px;border-radius:14px;font-family:'Outfit',sans-serif;font-weight:800;text-align:center}
 </style>
@@ -65,6 +77,12 @@ html,body{width:100vw;height:100vh;background:transparent;display:flex;justify-c
   <div class="ov-timer" id="ov-timer">01:00</div>
   <div class="ranks" id="ov-ranks"></div>
   <div class="ov-bot">👥 Total participants : <span id="ov-tot">0</span></div>
+
+  <div class="victory-modal" id="vic-modal" style="display:none">
+    <div class="vic-title" id="vic-title">🏆 WINNER!</div>
+    <div class="vic-sub" id="vic-sub">Victoire de l'enchère TikTok</div>
+    <div id="vic-content"></div>
+  </div>
 </div>
 
 <script>
@@ -95,10 +113,15 @@ function fmt(s) {
   return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 
+function getAvatar(p) {
+  if (p.av && !p.av.includes('dicebear') && !p.av.includes('unavatar')) return p.av;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000&font-size=0.55&bold=true`;
+}
+
 function render(s) {
   const c = s.color||'#ffd700';
   const card = document.getElementById('ov-card');
-  card.style.borderColor = c; card.style.boxShadow = `0 0 30px ${c}38`;
+  card.style.borderColor = c; card.style.boxShadow = `0 0 35px ${c}38`;
   document.getElementById('ov-top').style.borderColor = c;
   document.getElementById('ov-vouch').textContent = s.vouches_val || '100 VOUCHES';
   const minPill = document.getElementById('ov-min');
@@ -120,12 +143,36 @@ function render(s) {
   pt.className = 'ov-timer' + (s.snipe_on?' snipe':s.timer_on&&s.timer_rem<s.snipe_dur?' warn':'');
   document.getElementById('ov-tot').textContent = s.players.length;
 
+  const vicModal = document.getElementById('vic-modal');
+  if (sec === 0 && !s.timer_on && !s.snipe_on && s.players.length > 0) {
+    vicModal.style.display = 'flex';
+    const top = s.players.slice(0, 2);
+    if (top.length >= 2 && top[0].coins === top[1].coins && top[0].coins > 0) {
+      document.getElementById('vic-title').textContent = '🤝 ÉGALITÉ / TIE!';
+      document.getElementById('vic-sub').textContent = `Égalité parfaite avec ${top[0].coins} 🪙 !`;
+      document.getElementById('vic-content').innerHTML = `
+        <div style="display:flex;gap:18px;align-items:center;justify-content:center;margin-bottom:12px">
+          <div><img class="vic-av" src="${getAvatar(top[0])}"><div class="vic-name">@${esc(top[0].u)}</div></div>
+          <div style="font-size:1.6rem;font-weight:900;color:#ffd700">VS</div>
+          <div><img class="vic-av" src="${getAvatar(top[1])}"><div class="vic-name">@${esc(top[1].u)}</div></div>
+        </div>`;
+    } else if (top[0].coins > 0) {
+      document.getElementById('vic-title').textContent = '🏆 WINNER!';
+      document.getElementById('vic-sub').textContent = `Victoire avec ${top[0].coins} 🪙 !`;
+      document.getElementById('vic-content').innerHTML = `
+        <img class="vic-av" src="${getAvatar(top[0])}">
+        <div class="vic-name">@${esc(top[0].u)}</div>`;
+    }
+  } else {
+    vicModal.style.display = 'none';
+  }
+
   const top3 = s.players.slice(0,3);
   document.getElementById('ov-ranks').innerHTML = [0,1,2].map(i => {
     const p = top3[i], cls=['r1','r2','r3'][i];
     return p ? `<div class="rrow ${cls}">
       <div class="rbadge">${i+1}</div>
-      <img class="rav" src="${p.av}" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
+      <img class="rav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000'">
       <div class="rname">${esc(p.name || p.nick || p.u)}</div>
       <div class="rcoins">${p.coins}<div class="ddots"><div class="dd"></div><div class="dd"></div></div></div>
     </div>` :
