@@ -19,7 +19,7 @@
   --muted: rgba(255, 255, 255, 0.45);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; cursor: none !important; }
 body {
   font-family: 'Outfit', sans-serif;
   background: var(--bg);
@@ -43,7 +43,7 @@ body {
 .custom-cursor {
   width: 22px; height: 22px; border: 2px solid var(--gold); border-radius: 50%;
   position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
-  transition: transform 0.08s ease, width 0.2s, height 0.2s; box-shadow: 0 0 15px var(--gold);
+  transition: transform 0.05s ease, width 0.2s, height 0.2s; box-shadow: 0 0 15px var(--gold);
 }
 .custom-cursor-dot {
   width: 6px; height: 6px; background: #fff; border-radius: 50%;
@@ -151,7 +151,7 @@ body {
 .cd:hover { transform: scale(1.3); } .cd.on { border-color: #fff; box-shadow: 0 0 15px #fff; }
 
 .preview {
-  display: flex; align-items: center; justify-content: center; min-height: 300px;
+  display: flex; align-items: center; justify-content: center; min-height: 320px;
   background: rgba(0, 0, 0, 0.6); border-radius: 24px;
   border: 1.5px dashed rgba(255, 255, 255, 0.15); position: relative; overflow: hidden;
 }
@@ -263,6 +263,18 @@ body {
     </div>
 
     <div class="card">
+      <div class="stitle">🎨 Thème de l'Overlay (Style Hypecode)</div>
+      <div class="f">
+        <select id="theme-select" onchange="updateTheme()">
+          <option value="hypercode">📦 Style Hypecode (Cases séparées)</option>
+          <option value="cyber">⚡ Style Cyber Neon</option>
+          <option value="galaxy">🌌 Style Galaxy Spacial</option>
+          <option value="minimal">💎 Style Minimal Glass</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="stitle">⭐ Récompense / Vouches</div>
       <div class="f">
         <input id="vouch-input" type="text" value="100 VOUCHES" placeholder="EX: 100 VOUCHES" oninput="updateVouchesConfig()" onchange="updateVouchesConfig()">
@@ -287,7 +299,7 @@ body {
     </div>
 
     <div class="card">
-      <div class="stitle">🎨 Couleur d'Overlay</div>
+      <div class="stitle">🎨 Couleur d'Accents</div>
       <div class="crow">
         <div class="cd on" style="background:#ffd700" onclick="setColor('#ffd700',this)"></div>
         <div class="cd" style="background:#fff" onclick="setColor('#ffffff',this)"></div>
@@ -463,7 +475,7 @@ function render(s) {
     const top = s.players.slice(0, 2);
     if (top.length >= 2 && top[0].coins === top[1].coins && top[0].coins > 0) {
       document.getElementById('vic-title').textContent = '🤝 ÉGALITÉ / TIE!';
-      document.getElementById('vic-sub').textContent = `Égalité parfaite avec ${top[0].coins} 🪙 !`;
+      document.getElementById('vic-sub').textContent = `Égalité parfaite avec ${top[0].coins} 🪙 ! Reloading Snipe Delay...`;
       document.getElementById('vic-content').innerHTML = `
         <div style="display:flex;gap:18px;align-items:center;justify-content:center;margin-bottom:12px">
           <div><img class="vic-av" src="${getAvatar(top[0])}"><div class="vic-name">@${esc(top[0].u)}</div></div>
@@ -498,6 +510,11 @@ function render(s) {
     } else {
       minPill.style.display = 'none';
     }
+  }
+
+  if (document.activeElement !== document.getElementById('theme-select')) {
+    const ts = document.getElementById('theme-select');
+    if (ts && s.theme) ts.value = s.theme;
   }
 
   if (document.activeElement !== document.getElementById('c-dur') && document.activeElement !== document.getElementById('c-snipe')) {
@@ -581,6 +598,7 @@ const api = (url, body) => fetch(url, {
 
 function timer(action)   { api('/api/timer', {action}); }
 function setTimer()      { api('/api/timer', {action:'set', duration:+document.getElementById('c-dur').value||60, snipe_delay:+document.getElementById('c-snipe').value||10}); }
+function updateTheme()   { api('/api/config', {theme: document.getElementById('theme-select').value}); }
 function setColor(c,el)  { document.querySelectorAll('.cd.on').forEach(d=>d.classList.remove('on')); if(el)el.classList.add('on'); api('/api/color',{color:c}); }
 function tikConnect()    { const u=document.getElementById('tt-user').value.trim(); if(u) api('/api/tiktok',{action:'connect',user:u}); }
 function tikDisconnect() { api('/api/tiktok',{action:'disconnect'}); }
