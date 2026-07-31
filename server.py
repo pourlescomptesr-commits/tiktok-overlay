@@ -68,6 +68,7 @@ def get_store(key):
             "min_bid_val": 1,
             "vouches_val": "100 VOUCHES",
             "color": "#ffd700",
+            "theme": "hypercode",
             "tiktok": "off",
             "tiktok_user": "",
             "cf_url": "",
@@ -107,15 +108,22 @@ def update_timer(s):
         s["snipe_rem"] -= elapsed
         if s["snipe_rem"] <= 0:
             s["snipe_rem"] = 0
-            s["snipe_on"] = False
-            s["timer_on"] = False
+            # Auto-relaunch Snipe Delay if TIE occurs at timer end!
+            top = sorted(s["players"], key=lambda x: x["coins"], reverse=True)[:2]
+            if len(top) >= 2 and top[0]["coins"] == top[1]["coins"] and top[0]["coins"] > 0:
+                s["snipe_on"] = True
+                s["snipe_rem"] = s["snipe_dur"] if s["snipe_dur"] > 0 else 10
+            else:
+                s["snipe_on"] = False
+                s["timer_on"] = False
     elif s["timer_on"]:
         s["timer_rem"] -= elapsed
         if s["timer_rem"] <= 0:
             s["timer_rem"] = 0
-            if s["snipe_dur"] > 0:
+            top = sorted(s["players"], key=lambda x: x["coins"], reverse=True)[:2]
+            if s["snipe_dur"] > 0 or (len(top) >= 2 and top[0]["coins"] == top[1]["coins"] and top[0]["coins"] > 0):
                 s["snipe_on"] = True
-                s["snipe_rem"] = s["snipe_dur"]
+                s["snipe_rem"] = s["snipe_dur"] if s["snipe_dur"] > 0 else 10
             else:
                 s["timer_on"] = False
 
@@ -146,6 +154,7 @@ def get_public_state(s):
         "min_bid_val": s["min_bid_val"],
         "vouches_val": s.get("vouches_val", "100 VOUCHES"),
         "color": s["color"],
+        "theme": s.get("theme", "hypercode"),
         "tiktok": s["tiktok"],
         "tiktok_user": s["tiktok_user"],
         "cf_url": s["cf_url"],
@@ -300,6 +309,7 @@ def api_config():
     if 'vouches_val' in data:
         s["vouches_val"] = str(data['vouches_val'])
     if 'color' in data: s["color"] = str(data['color'])
+    if 'theme' in data: s["theme"] = str(data['theme'])
 
     notify(s)
     return jsonify(ok=True, state=get_public_state(s))
