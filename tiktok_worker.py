@@ -1,4 +1,4 @@
-import sys, time, json, asyncio, urllib.request, re
+import sys, time, json, asyncio, urllib.request, httpx
 
 if len(sys.argv) < 3:
     sys.exit(1)
@@ -7,9 +7,10 @@ key = sys.argv[1]
 username = sys.argv[2].strip().lstrip('@')
 port = sys.argv[3] if len(sys.argv) > 3 else "3000"
 
-PROXY_URL = "http://lresmlvg:nn73ir9gv9zs@31.59.20.176:6754"
+PROXY_STR = "http://lresmlvg:nn73ir9gv9zs@31.59.20.176:6754"
+httpx_proxy = httpx.Proxy(PROXY_STR)
 
-print(f"[TikTok Worker] Démarrage pour key={key}, user=@{username} (proxy={PROXY_URL})", flush=True)
+print(f"[TikTok Worker] Démarrage pour key={key}, user=@{username} (proxy={PROXY_STR})", flush=True)
 
 def notify_flask(endpoint, data):
     for host in ["127.0.0.1", "localhost", "0.0.0.0"]:
@@ -35,7 +36,7 @@ for attempt in range(1, 3):
             print(f"[TikTok Worker] Essai {attempt} {platform.name} pour @{username}...", flush=True)
             notify_flask('/api/internal/tiktok_status', {"status": "connecting", "user": username})
 
-            client = TikTokLiveClient(unique_id=username, platform=platform, web_proxy=PROXY_URL, ws_proxy=None)
+            client = TikTokLiveClient(unique_id=username, platform=platform, web_proxy=httpx_proxy, ws_proxy=None)
             client.web.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
             @client.on(ConnectEvent)
