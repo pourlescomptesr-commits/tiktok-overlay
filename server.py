@@ -1,6 +1,12 @@
 import os, time, json, subprocess, sys
 from flask import Flask, request, jsonify, Response, send_from_directory, render_template_string
 
+try:
+    from gevent.pywsgi import WSGIServer
+    HAS_GEVENT = True
+except Exception:
+    HAS_GEVENT = False
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=os.path.join(BASE_DIR, 'public'), static_url_path='')
 
@@ -443,11 +449,10 @@ def api_admin_keys_delete():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
-    try:
-        from gevent.pywsgi import WSGIServer
+    if HAS_GEVENT:
         print(f"🚀 Serveur Production Gevent WSGI démarré sur le port {port}", flush=True)
         http_server = WSGIServer(('0.0.0.0', port), app)
         http_server.serve_forever()
-    except Exception as ex:
-        print(f" Serveur Flask démarré sur le port {port} ({ex})", flush=True)
+    else:
+        print(f" Serveur Flask démarré sur le port {port}", flush=True)
         app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
