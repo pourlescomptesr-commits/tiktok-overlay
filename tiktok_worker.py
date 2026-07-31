@@ -7,7 +7,7 @@ key = sys.argv[1]
 username = sys.argv[2].strip().lstrip('@')
 port = sys.argv[3] if len(sys.argv) > 3 else "3000"
 
-PROXY_URL = "http://lresmlvg:nn73ir9gv9zs@p.webshare.io:80"
+PROXY_URL = "http://lresmlvg:nn73ir9gv9zs@31.59.20.176:6754"
 
 print(f"[TikTok Worker] Démarrage pour key={key}, user=@{username} (proxy={PROXY_URL})", flush=True)
 
