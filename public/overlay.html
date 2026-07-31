@@ -2,54 +2,88 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Overlay Stream Pro — TikTok Auction Live</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100vw;height:100vh;background:transparent;display:flex;justify-content:center;align-items:center;overflow:hidden}
-
-.ov-card{
-  width:320px;background:rgba(7,8,15,.96);border:2.5px solid #ffd700;
-  border-radius:22px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;
-  box-shadow:0 0 35px rgba(255,215,0,.28);transition:border-color .3s,box-shadow .3s;
-  font-family:'Outfit',sans-serif;color:#fff;position:relative;overflow:hidden;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100vw; height: 100vh;
+  background: transparent;
+  display: flex; justify-content: center; align-items: center;
+  overflow: hidden;
+  font-family: 'Outfit', sans-serif; color: #fff;
 }
-.ov-top{background:rgba(0,0,0,.88);border:1.5px solid #ffd700;border-radius:30px;
-  padding:5px 20px;font-size:.82rem;font-weight:800;display:flex;align-items:center;gap:7px;transition:border-color .3s;letter-spacing:1px}
-.ov-mid{display:flex;gap:7px;width:100%;justify-content:center}
-.ov-pill{background:rgba(0,0,0,.85);border-radius:30px;padding:4px 13px;font-size:.7rem;font-weight:800;display:flex;align-items:center;gap:4px}
-.ov-pill.min{border:1.5px solid #ffd700;transition:border-color .3s}
-.ov-pill.snipe{border:1.5px solid rgba(255,255,255,.15)}
-.ov-pill.snipe.hot{border-color:#ff3b5c;box-shadow:0 0 14px rgba(255,59,92,0.6)}
-.ov-pill .hl{color:#ffd700;transition:color .3s}
-.ov-pill.snipe .hl{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:.66rem}
-.ov-pill.snipe.hot .hl{background:#ff3b5c;color:#fff}
-.ov-timer{font-family:'Share Tech Mono',monospace;font-size:3.3rem;color:#39ff14;
-  text-shadow:0 0 18px rgba(57,255,20,.6);letter-spacing:2px;line-height:1;transition:color .3s}
-.ov-timer.warn{color:#ffaa00;text-shadow:0 0 18px rgba(255,170,0,.7)}
-.ov-timer.snipe{color:#ff3b5c;text-shadow:0 0 24px rgba(255,59,92,.85);animation:blink .8s ease infinite alternate}
-@keyframes blink{from{opacity:1}to{opacity:.4}}
 
-.ranks{width:100%;display:flex;flex-direction:column;gap:7px}
-.rrow{background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.07);
-  border-radius:12px;padding:7px 11px;display:flex;align-items:center;gap:9px;height:48px;
-  transition:border-color .3s,box-shadow .3s}
-.rrow.r1{border-color:rgba(255,215,0,.45);box-shadow:0 0 12px rgba(255,215,0,.15)}
-.rrow.r2{border-color:rgba(180,180,190,.3)}
-.rrow.r3{border-color:rgba(205,127,50,.3)}
-.rbadge{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:.72rem;font-weight:900;flex-shrink:0;background:rgba(255,255,255,.07);color:rgba(255,255,255,.35)}
-.r1 .rbadge{background:#ffd700;color:#000;box-shadow:0 0 8px rgba(255,215,0,.5)}
-.r2 .rbadge{background:#b4b4be;color:#000}
-.r3 .rbadge{background:#cd7f32;color:#fff}
-.rav{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.15);flex-shrink:0;background:rgba(255,255,255,.04)}
-.rname{flex:1;font-size:.84rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rcoins{font-size:.88rem;font-weight:900;display:flex;align-items:center;gap:5px}
-.ddots{display:flex;gap:3px}
-.dd{width:6px;height:6px;border-radius:50%;background:#ffd700;box-shadow:0 0 4px #ffd700}
+.stacked-overlay {
+  display: flex; flex-direction: column; gap: 10px;
+  width: 320px; position: relative;
+}
 
-.ov-bot{background:rgba(0,0,0,.88);border:1.5px solid rgba(127,0,255,.45);
-  border-radius:20px;padding:4px 16px;font-size:.74rem;font-weight:800;display:flex;align-items:center;gap:6px}
+.pill-card {
+  background: rgba(10, 14, 22, 0.94);
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.85rem; font-weight: 900; letter-spacing: 1.5px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s;
+}
+.pill-card.min { border: 2px solid #00e676; color: #00e676; }
+.pill-card.snipe { border: 2px solid #ff3b5c; color: #fff; }
+.pill-card.snipe .val { background: #ff3b5c; padding: 2px 8px; border-radius: 6px; color: #fff; }
+.pill-card.vouch { border: 2px solid #9c27b0; color: #ce93d8; }
+
+.main-box {
+  background: rgba(10, 14, 22, 0.96);
+  border: 2.5px solid #ffd700;
+  border-radius: 20px;
+  padding: 20px 16px 14px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  box-shadow: 0 0 35px rgba(255, 215, 0, 0.3);
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.timer-num {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 3.4rem; font-weight: 700;
+  color: #39ff14; text-shadow: 0 0 20px rgba(57, 255, 20, 0.65);
+  line-height: 1; letter-spacing: 2px;
+}
+.timer-num.warn { color: #ffaa00; text-shadow: 0 0 20px rgba(255, 170, 0, 0.7); }
+.timer-num.snipe { color: #ff3b5c; text-shadow: 0 0 26px rgba(255, 59, 92, 0.9); animation: blink 0.8s ease infinite alternate; }
+@keyframes blink { from { opacity: 1; } to { opacity: 0.35; } }
+
+.sep { width: 100%; height: 1px; background: rgba(255, 215, 0, 0.25); margin: -2px 0 2px 0; }
+
+.ranks { width: 100%; display: flex; flex-direction: column; gap: 9px; }
+.rrow {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px; padding: 8px 12px;
+  display: flex; align-items: center; gap: 10px; height: 50px;
+}
+.rrow.r1 { border-color: #ffd700; background: rgba(255, 215, 0, 0.08); box-shadow: 0 0 12px rgba(255, 215, 0, 0.2); }
+.rrow.r2 { border-color: rgba(180, 180, 190, 0.4); }
+.rrow.r3 { border-color: rgba(205, 127, 50, 0.4); }
+
+.medal { font-size: 1.2rem; }
+.rav-wrap { position: relative; width: 34px; height: 34px; }
+.rav { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); }
+.rbadge {
+  position: absolute; bottom: -3px; right: -3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 900; background: #fff; color: #000;
+}
+.r1 .rbadge { background: #ffd700; } .r2 .rbadge { background: #b4b4be; } .r3 .rbadge { background: #cd7f32; color: #fff; }
+
+.rname { flex: 1; font-size: 0.85rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rcoins { font-size: 0.9rem; font-weight: 900; color: #ffd700; display: flex; align-items: center; gap: 4px; }
+
+.bot-bar { font-size: 0.74rem; font-weight: 800; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; gap: 6px; }
 
 .victory-modal {
   position: absolute; inset: 0; background: rgba(7, 8, 15, 0.96); backdrop-filter: blur(14px);
@@ -60,28 +94,30 @@ html,body{width:100vw;height:100vh;background:transparent;display:flex;justify-c
 @keyframes popIn { from { opacity: 0; transform: scale(0.75); } to { opacity: 1; transform: scale(1); } }
 .vic-title { font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #ffd700, #ff9900); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
 .vic-sub { font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 700; margin-bottom: 18px; }
-.vic-av { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #ffd700; box-shadow: 0 0 30px #ffd700; object-fit: cover; margin-bottom: 12px; }
+.vic-av { width: 80px; height: 80px; border-radius: 50%; border: 3.5px solid #ffd700; box-shadow: 0 0 30px #ffd700; object-fit: cover; margin-bottom: 12px; }
 .vic-name { font-size: 1.3rem; font-weight: 900; color: #fff; }
 
-.err-msg{background:rgba(255,59,92,0.9);color:#fff;padding:20px;border-radius:14px;font-family:'Outfit',sans-serif;font-weight:800;text-align:center}
+.err-msg { background: rgba(255,59,92,0.9); color: #fff; padding: 20px; border-radius: 14px; font-weight: 800; text-align: center; }
 </style>
 </head>
 <body>
 
-<div class="ov-card" id="ov-card">
-  <div class="ov-top" id="ov-top">⭐ <span id="ov-vouch">100 VOUCHES</span></div>
-  <div class="ov-mid">
-    <div class="ov-pill min" id="ov-min">✅ MIN : <span class="hl">1</span>🪙</div>
-    <div class="ov-pill snipe" id="ov-snipe">🛡️ SNIPE <span class="hl">10S</span></div>
-  </div>
-  <div class="ov-timer" id="ov-timer">01:00</div>
-  <div class="ranks" id="ov-ranks"></div>
-  <div class="ov-bot">👥 Total participants : <span id="ov-tot">0</span></div>
+<div class="stacked-overlay" id="ov-container">
+  <div class="pill-card min" id="ov-min"><span>✅ MINIMUM</span><span id="min-val">AUCUN</span></div>
+  <div class="pill-card snipe" id="ov-snipe"><span>🛡️ SNIPE DELAY</span><span class="val" id="snipe-val">10S</span></div>
+  <div class="pill-card vouch" id="ov-vouch-card"><span>⭐ VOUCHES</span><span id="ov-vouch">100</span></div>
 
-  <div class="victory-modal" id="vic-modal" style="display:none">
-    <div class="vic-title" id="vic-title">🏆 WINNER!</div>
-    <div class="vic-sub" id="vic-sub">Victoire de l'enchère TikTok</div>
-    <div id="vic-content"></div>
+  <div class="main-box" id="ov-box">
+    <div class="timer-num" id="ov-timer">01:00</div>
+    <div class="sep"></div>
+    <div class="ranks" id="ov-ranks"></div>
+    <div class="bot-bar">👥 Total participants: <span id="ov-tot">0</span></div>
+
+    <div class="victory-modal" id="vic-modal" style="display:none">
+      <div class="vic-title" id="vic-title">🏆 WINNER!</div>
+      <div class="vic-sub" id="vic-sub">Victoire de l'enchère TikTok</div>
+      <div id="vic-content"></div>
+    </div>
   </div>
 </div>
 
@@ -119,28 +155,35 @@ function getAvatar(p) {
 }
 
 function render(s) {
-  const c = s.color||'#ffd700';
-  const card = document.getElementById('ov-card');
-  card.style.borderColor = c; card.style.boxShadow = `0 0 35px ${c}38`;
-  document.getElementById('ov-top').style.borderColor = c;
+  const c = s.color || '#ffd700';
+  const box = document.getElementById('ov-box');
+  box.style.borderColor = c;
+  box.style.boxShadow = `0 0 35px ${c}38`;
+
   document.getElementById('ov-vouch').textContent = s.vouches_val || '100 VOUCHES';
-  const minPill = document.getElementById('ov-min');
-  minPill.style.borderColor = c;
+
+  const minCard = document.getElementById('ov-min');
   if (s.min_bid_enabled) {
-    minPill.style.display = 'flex';
-    minPill.innerHTML = `✅ MIN : <span class="hl">${s.min_bid_val||1}</span>🪙`;
+    document.getElementById('min-val').textContent = `${s.min_bid_val||1} 🪙`;
+    minCard.style.borderColor = c;
   } else {
-    minPill.style.display = 'none';
+    document.getElementById('min-val').textContent = `AUCUN`;
   }
-  
-  const sEl = document.getElementById('ov-snipe');
-  sEl.className = 'ov-pill snipe' + (s.snipe_on?' hot':'');
-  sEl.innerHTML = `🛡️ SNIPE <span class="hl">${s.snipe_on?Math.ceil(s.snipe_rem)+'S':Math.ceil(s.snipe_dur)+'S'}</span>`;
+
+  const sCard = document.getElementById('ov-snipe');
+  const snipeVal = document.getElementById('snipe-val');
+  if (s.snipe_on) {
+    sCard.style.borderColor = '#ff3b5c';
+    snipeVal.textContent = `${Math.ceil(s.snipe_rem)}S`;
+  } else {
+    sCard.style.borderColor = 'rgba(255,255,255,0.2)';
+    snipeVal.textContent = `${Math.ceil(s.snipe_dur)}S`;
+  }
 
   const sec = s.snipe_on ? s.snipe_rem : s.timer_rem;
   const pt = document.getElementById('ov-timer');
   pt.textContent = fmt(sec);
-  pt.className = 'ov-timer' + (s.snipe_on?' snipe':s.timer_on&&s.timer_rem<s.snipe_dur?' warn':'');
+  pt.className = 'timer-num' + (s.snipe_on?' snipe':s.timer_on&&s.timer_rem<s.snipe_dur?' warn':'');
   document.getElementById('ov-tot').textContent = s.players.length;
 
   const vicModal = document.getElementById('vic-modal');
@@ -149,7 +192,7 @@ function render(s) {
     const top = s.players.slice(0, 2);
     if (top.length >= 2 && top[0].coins === top[1].coins && top[0].coins > 0) {
       document.getElementById('vic-title').textContent = '🤝 ÉGALITÉ / TIE!';
-      document.getElementById('vic-sub').textContent = `Égalité parfaite avec ${top[0].coins} 🪙 !`;
+      document.getElementById('vic-sub').textContent = `Égalité avec ${top[0].coins} 🪙 ! Relance du Snipe...`;
       document.getElementById('vic-content').innerHTML = `
         <div style="display:flex;gap:18px;align-items:center;justify-content:center;margin-bottom:12px">
           <div><img class="vic-av" src="${getAvatar(top[0])}"><div class="vic-name">@${esc(top[0].u)}</div></div>
@@ -167,24 +210,24 @@ function render(s) {
     vicModal.style.display = 'none';
   }
 
-  const top3 = s.players.slice(0,3);
+  const top3 = s.players.slice(0, 3);
+  const medals = ['🥇', '🥈', '🥉'];
   document.getElementById('ov-ranks').innerHTML = [0,1,2].map(i => {
     const p = top3[i], cls=['r1','r2','r3'][i];
     return p ? `<div class="rrow ${cls}">
-      <div class="rbadge">${i+1}</div>
-      <img class="rav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000'">
+      <span class="medal">${medals[i]}</span>
+      <div class="rav-wrap">
+        <img class="rav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000'">
+        <div class="rbadge">${i+1}</div>
+      </div>
       <div class="rname">${esc(p.name || p.nick || p.u)}</div>
-      <div class="rcoins">${p.coins}<div class="ddots"><div class="dd"></div><div class="dd"></div></div></div>
+      <div class="rcoins">${p.coins} 🪙</div>
     </div>` :
-    `<div class="rrow" style="opacity:.25"><div class="rbadge">${i+1}</div><div class="rav"></div><div class="rname" style="color:#444">—</div></div>`;
+    `<div class="rrow" style="opacity:.25"><span class="medal">${medals[i]}</span><div class="rav-wrap"><div class="rav"></div><div class="rbadge">${i+1}</div></div><div class="rname" style="color:#555">—</div></div>`;
   }).join('');
 }
 
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-document.getElementById('ov-ranks').innerHTML = [1,2,3].map(i=>
-  `<div class="rrow" style="opacity:.25"><div class="rbadge">${i}</div><div class="rav"></div><div class="rname" style="color:#444">—</div></div>`
-).join('');
 </script>
 </body>
 </html>
