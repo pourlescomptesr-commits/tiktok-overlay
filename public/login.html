@@ -3,17 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TikTok Auction Pro — Cosmic Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<title>XORTEX PANEL — Portal Streamer Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #070614;
+  --bg: #05040d;
   --violet: #6b11ff;
   --indigo: #0d0b26;
   --cyan: #00f3ff;
   --neon-purple: #b026ff;
-  --card-bg: rgba(13, 11, 38, 0.85);
-  --border: rgba(107, 17, 255, 0.35);
+  --gold: #ffd700;
+  --card-bg: rgba(10, 8, 30, 0.88);
+  --border: rgba(107, 17, 255, 0.4);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; cursor: none !important; }
@@ -55,7 +56,7 @@ body {
 
 .nebula-overlay {
   position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 30%, rgba(107, 17, 255, 0.18) 0%, rgba(0, 243, 255, 0.08) 45%, transparent 80%);
+  background: radial-gradient(circle at 50% 30%, rgba(107, 17, 255, 0.22) 0%, rgba(0, 243, 255, 0.08) 45%, transparent 80%);
   z-index: 1; pointer-events: none;
 }
 
@@ -63,26 +64,28 @@ body {
   position: relative; z-index: 10;
   display: flex; align-items: center; justify-content: space-between;
   padding: 22px 45px;
-  background: rgba(7, 6, 20, 0.6);
+  background: rgba(5, 4, 13, 0.7);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(107, 17, 255, 0.2);
+  border-bottom: 1px solid rgba(107, 17, 255, 0.25);
 }
 .logo {
-  font-size: 1.25rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase;
-  background: linear-gradient(90deg, var(--cyan), var(--neon-purple), var(--violet));
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase;
+  background: linear-gradient(90deg, var(--cyan), var(--gold), var(--neon-purple));
   background-size: 200% auto;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   animation: shine 4s linear infinite;
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 12px;
 }
 @keyframes shine { to { background-position: 200% center; } }
 
+.badge-group { display: flex; align-items: center; gap: 12px; }
 .ping-pill {
   padding: 8px 18px;
   background: rgba(0, 243, 255, 0.08);
-  border: 1px solid rgba(0, 243, 255, 0.3);
+  border: 1px solid rgba(0, 243, 255, 0.35);
   border-radius: 30px;
-  font-size: 0.8rem; font-weight: 800; color: var(--cyan);
+  font-size: 0.78rem; font-weight: 800; color: var(--cyan);
   display: flex; align-items: center; gap: 8px;
   letter-spacing: 1px;
   box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
@@ -97,16 +100,16 @@ body {
 
 .tilt-card-wrapper {
   perspective: 1000px;
-  width: 100%; max-width: 460px;
+  width: 100%; max-width: 480px;
 }
 
 .card {
   background: var(--card-bg);
-  border-radius: 32px;
-  padding: 50px 42px;
-  backdrop-filter: blur(35px);
+  border-radius: 36px;
+  padding: 52px 45px;
+  backdrop-filter: blur(40px);
   position: relative;
-  box-shadow: 0 30px 100px rgba(0,0,0,0.9), 0 0 60px rgba(107, 17, 255, 0.25);
+  box-shadow: 0 30px 100px rgba(0,0,0,0.95), 0 0 70px rgba(107, 17, 255, 0.3);
   transform-style: preserve-3d;
   transition: transform 0.2s ease-out;
   overflow: hidden;
@@ -114,9 +117,9 @@ body {
 }
 
 .card::before {
-  content: ''; position: absolute; inset: -2px; border-radius: 34px;
+  content: ''; position: absolute; inset: -2px; border-radius: 38px;
   padding: 2px;
-  background: linear-gradient(135deg, var(--cyan), var(--neon-purple), var(--violet));
+  background: linear-gradient(135deg, var(--cyan), var(--gold), var(--neon-purple), var(--violet));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -127,64 +130,65 @@ body {
 @keyframes borderRotate { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
 .icon-glow {
-  width: 84px; height: 84px; margin: 0 auto 24px auto;
-  border-radius: 26px;
-  background: linear-gradient(135deg, rgba(107,17,255,0.3), rgba(0,243,255,0.2));
-  border: 1.5px solid rgba(0, 243, 255, 0.5);
+  width: 90px; height: 90px; margin: 0 auto 24px auto;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(107,17,255,0.4), rgba(0,243,255,0.25));
+  border: 1.5px solid rgba(0, 243, 255, 0.6);
   display: flex; align-items: center; justify-content: center;
-  font-size: 2.6rem;
-  box-shadow: 0 0 40px rgba(107, 17, 255, 0.4), inset 0 0 20px rgba(0, 243, 255, 0.3);
-  transform: translateZ(30px);
+  font-size: 2.8rem;
+  box-shadow: 0 0 45px rgba(107, 17, 255, 0.5), inset 0 0 25px rgba(0, 243, 255, 0.35);
+  transform: translateZ(35px);
 }
 
 .title {
-  font-size: 2rem; font-weight: 900; letter-spacing: 1px;
-  background: linear-gradient(135deg, #fff, var(--cyan), var(--neon-purple));
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.1rem; font-weight: 900; letter-spacing: 2px;
+  background: linear-gradient(135deg, #fff, var(--gold), var(--cyan));
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   margin-bottom: 8px; text-transform: uppercase;
-  transform: translateZ(25px);
+  transform: translateZ(30px);
 }
 .sub {
-  font-size: 0.85rem; color: rgba(255, 255, 255, 0.55); font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 38px;
-  transform: translateZ(20px);
+  font-size: 0.85rem; color: rgba(255, 255, 255, 0.6); font-weight: 800;
+  letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 38px;
+  transform: translateZ(22px);
 }
 
-.field { text-align: left; margin-bottom: 24px; transform: translateZ(15px); }
+.field { text-align: left; margin-bottom: 24px; transform: translateZ(18px); }
 .field label {
-  font-size: 0.75rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.65); margin-bottom: 10px; display: block;
+  font-size: 0.75rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75); margin-bottom: 10px; display: block;
 }
 
 .input {
   width: 100%; padding: 18px 24px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1.5px solid rgba(107, 17, 255, 0.4);
-  border-radius: 16px; color: #fff;
-  font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; font-weight: 700;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1.5px solid rgba(107, 17, 255, 0.5);
+  border-radius: 18px; color: #fff;
+  font-family: 'Share Tech Mono', monospace; font-size: 1.25rem; font-weight: 700;
   letter-spacing: 3px; text-align: center; outline: none;
   transition: all 0.25s ease;
 }
 .input:focus {
   border-color: var(--cyan);
   background: rgba(0, 243, 255, 0.08);
-  box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+  box-shadow: 0 0 35px rgba(0, 243, 255, 0.35);
 }
 .input::placeholder { color: rgba(255, 255, 255, 0.25); font-family: 'Outfit'; font-size: 0.95rem; letter-spacing: 1px; }
 
 .btn-galaxy {
   width: 100%; padding: 18px;
   background: linear-gradient(135deg, var(--violet), var(--neon-purple));
-  border: 1.5px solid rgba(0, 243, 255, 0.4); border-radius: 16px; color: #fff;
+  border: 1.5px solid rgba(0, 243, 255, 0.5); border-radius: 18px; color: #fff;
   font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1rem;
   letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
-  box-shadow: 0 10px 40px rgba(107, 17, 255, 0.5);
+  box-shadow: 0 10px 45px rgba(107, 17, 255, 0.55);
   transition: all 0.2s ease;
-  transform: translateZ(20px);
+  transform: translateZ(22px);
 }
 .btn-galaxy:hover {
-  transform: translateZ(30px) translateY(-2px);
-  box-shadow: 0 15px 50px rgba(176, 38, 255, 0.7), 0 0 30px var(--cyan);
+  transform: translateZ(35px) translateY(-2px);
+  box-shadow: 0 15px 55px rgba(176, 38, 255, 0.85), 0 0 35px var(--cyan);
   border-color: var(--cyan);
 }
 
@@ -206,15 +210,17 @@ body {
 <div class="custom-cursor-dot" id="cursor-dot"></div>
 
 <div class="topbar">
-  <div class="logo">🎯 TikTok Auction Galaxy</div>
-  <div class="ping-pill"><div class="ping-dot"></div>CLOUDFLARE 12ms</div>
+  <div class="logo">⚡ XORTEX PANEL</div>
+  <div class="badge-group">
+    <div class="ping-pill"><div class="ping-dot"></div>SERVER LIVE 12ms</div>
+  </div>
 </div>
 
 <div class="center-container">
   <div class="tilt-card-wrapper" id="card-wrapper">
     <div class="card" id="card">
-      <div class="icon-glow">🌌</div>
-      <div class="title">Command Portal</div>
+      <div class="icon-glow">👑</div>
+      <div class="title">XORTEX PANEL</div>
       <div class="sub">Authentification Streamer Pro</div>
 
       <div class="field">
@@ -247,7 +253,7 @@ class Particle {
     this.size = isTrail ? Math.random() * 3 + 1 : Math.random() * 2 + 0.5;
     this.speedX = (Math.random() - 0.5) * (isTrail ? 2.5 : 0.8);
     this.speedY = (Math.random() - 0.5) * (isTrail ? 2.5 : 0.8);
-    this.color = ['#00f3ff', '#6b11ff', '#b026ff', '#ffffff'][Math.floor(Math.random()*4)];
+    this.color = ['#00f3ff', '#6b11ff', '#b026ff', '#ffd700', '#ffffff'][Math.floor(Math.random()*5)];
     this.alpha = isTrail ? 1 : Math.random() * 0.7 + 0.3;
     this.life = isTrail ? 40 : 9999;
   }
@@ -271,8 +277,7 @@ for (let i = 0; i < 90; i++) particles.push(new Particle());
 function animateParticles() {
   ctx.clearRect(0, 0, width, height);
   for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    p.update(); p.draw();
+    const p = particles[i]; p.update(); p.draw();
     if (p.life <= 0) particles.splice(i, 1);
   }
   requestAnimationFrame(animateParticles);
