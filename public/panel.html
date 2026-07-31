@@ -3,16 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Command Dashboard Pro — TikTok Auction Live</title>
+<title>XORTEX PANEL — Command Dashboard Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Outfit:wght@300;400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #070614;
+  --bg: #05040d;
   --surface: rgba(13, 11, 38, 0.88);
   --border: rgba(107, 17, 255, 0.35);
   --violet: #6b11ff;
   --cyan: #00f3ff;
   --neon-purple: #b026ff;
+  --gold: #ffd700;
   --green: #39ff14;
   --red: #ff3b5c;
   --muted: rgba(255, 255, 255, 0.5);
@@ -49,13 +50,13 @@ body {
   position: relative; z-index: 10;
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 36px;
-  background: rgba(7, 6, 20, 0.8); backdrop-filter: blur(20px);
+  background: rgba(5, 4, 13, 0.85); backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border); gap: 16px; flex-wrap: wrap;
 }
 .logo-group { display: flex; align-items: center; gap: 16px; }
 .logo {
-  font-size: 1.15rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;
-  background: linear-gradient(90deg, var(--cyan), var(--neon-purple), #fff);
+  font-family: 'Orbitron', sans-serif; font-size: 1.15rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;
+  background: linear-gradient(90deg, var(--cyan), var(--gold), var(--neon-purple));
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .kbadge {
@@ -181,15 +182,15 @@ body {
 .add-row input[type=text] { flex: 1; padding: 12px 18px; background: rgba(255, 255, 255, 0.04); border: 1.5px solid var(--border); border-radius: 12px; color: #fff; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.9rem; outline: none; }
 .add-row input[type=text]:focus { border-color: var(--cyan); background: rgba(0, 243, 255, 0.05); }
 .plist { display: flex; flex-direction: column; gap: 9px; max-height: 340px; overflow-y: auto; }
-.prow { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 14px; transition: transform 0.15s; }
+.prow { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 14px; transition: transform 0.15s; }
 .prow:hover { transform: translateX(3px); background: rgba(255, 255, 255, 0.05); }
-.pav { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.12); }
-.pinfo { flex: 1; min-width: 0; } .pname { font-size: 0.88rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .pun { font-size: 0.72rem; color: var(--muted); }
-.pcoins { font-size: 1rem; font-weight: 900; color: var(--cyan); margin-right: 6px; }
-.qb { padding: 6px 12px; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.75rem; cursor: pointer; background: rgba(255, 255, 255, 0.06); color: #ccc; border: 1px solid var(--border); transition: all 0.15s; }
+.pav { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.12); }
+.pinfo { flex: 1; min-width: 0; } .pname { font-size: 0.85rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .pun { font-size: 0.7rem; color: var(--muted); }
+.pcoins { font-size: 0.95rem; font-weight: 900; color: var(--cyan); margin-right: 4px; }
+.qb { padding: 5px 9px; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.74rem; cursor: pointer; background: rgba(255, 255, 255, 0.06); color: #ccc; border: 1px solid var(--border); transition: all 0.15s; }
 .qb:hover { background: rgba(255, 255, 255, 0.18); color: #fff; border-color: var(--cyan); } .qb.del { background: rgba(255, 59, 92, 0.15); color: var(--red); border-color: rgba(255, 59, 92, 0.35); }
 .qb.del:hover { background: var(--red); color: #fff; }
-.ci { width: 68px; padding: 5px 8px; background: rgba(0, 0, 0, 0.6); border: 1.5px solid var(--border); border-radius: 8px; color: var(--cyan); font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.88rem; text-align: center; outline: none; }
+.ci { width: 62px; padding: 5px 6px; background: rgba(0, 0, 0, 0.6); border: 1.5px solid var(--border); border-radius: 8px; color: var(--cyan); font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.85rem; text-align: center; outline: none; }
 .ci:focus { border-color: var(--cyan); }
 .empty { text-align: center; padding: 35px; color: var(--muted); font-size: 0.88rem; }
 .toast { position: fixed; bottom: 28px; right: 28px; background: #00e676; color: #000; padding: 14px 24px; border-radius: 14px; font-weight: 800; font-size: 0.88rem; box-shadow: 0 8px 30px rgba(0, 230, 118, 0.4); display: none; z-index: 999; }
@@ -204,7 +205,7 @@ body {
 
 <div class="topbar">
   <div class="logo-group">
-    <div class="logo">🎯 TikTok Auction Pro</div>
+    <div class="logo">⚡ XORTEX PANEL</div>
     <div class="kbadge" id="key-badge">CLÉ: ...</div>
     <div class="tt-status-badge off" id="tt-status-pill">
       <div class="dot" id="tt-status-dot"></div>
@@ -252,11 +253,11 @@ body {
       <div class="stitle">🎨 Style Visuel de l'Overlay Stream</div>
       <div class="f">
         <select id="theme-select" onchange="changeOverlayTheme(this.value)">
-          <option value="hypercode">📦 Style 1 : Cases Empilées Hypecode (Ref Photo)</option>
-          <option value="cyber_rect">⚡ Style 2 : Rectangulaire Cyber Neon HUD</option>
-          <option value="galaxy_portal">🌌 Style 3 : Galaxy Cosmic Orbit</option>
-          <option value="minimal_glass">💎 Style 4 : Minimal SaaS Glassmorphism</option>
-          <option value="neon_streamer">🚨 Style 5 : Double Néon Fluo Streamer</option>
+          <option value="xortex_hype">🔥 Style 1 : Xortex Hype Cards (Ref Photo)</option>
+          <option value="cyber_arcade">⚡ Style 2 : Cyber Arcade Rectangular HUD</option>
+          <option value="galaxy_nebula">🌌 Style 3 : Galaxy Nebula Orbit</option>
+          <option value="esports_pro">🏆 Style 4 : Esports Tournament Pro</option>
+          <option value="neon_synthwave">🌆 Style 5 : Synthwave Neon Retro</option>
         </select>
       </div>
     </div>
@@ -529,6 +530,7 @@ function render(s) {
             <img class="pav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=6b11ff&color=fff'">
             <div class="pinfo"><div class="pname">${esc(p.name || p.nick || p.u)}</div><div class="pun">@${esc(p.u)}</div></div>
             <span class="pcoins">${p.coins}🪙</span>
+            <button class="qb" onclick="delta('${p.u}',1)">+1</button>
             <button class="qb" onclick="delta('${p.u}',10)">+10</button>
             <button class="qb" onclick="delta('${p.u}',100)">+100</button>
             <button class="qb" onclick="delta('${p.u}',1000)">+1k</button>
