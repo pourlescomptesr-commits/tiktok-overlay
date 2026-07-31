@@ -240,6 +240,11 @@ function fmt(s) {
 
 let lastPlayersSig = '';
 
+function getAvatar(p) {
+  if (p.av && !p.av.includes('dicebear') && !p.av.includes('unavatar')) return p.av;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000&font-size=0.55&bold=true`;
+}
+
 function render(s) {
   cfUrl = s.cf_url || null;
   const cn = document.getElementById('c-num'), cl = document.getElementById('c-label');
@@ -307,7 +312,7 @@ function render(s) {
       const p = top3[i], cls=['r1','r2','r3'][i];
       return p ? `<div class="rrow ${cls}">
         <div class="rbadge">${i+1}</div>
-        <img class="rav" src="${p.av}" onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
+        <img class="rav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000'">
         <div class="rname">${esc(p.name || p.nick || p.u)}</div>
         <div class="rcoins">${p.coins}<div class="ddots"><div class="dd"></div><div class="dd"></div></div></div>
       </div>` :
@@ -326,7 +331,7 @@ function render(s) {
         pl.innerHTML = s.players.map((p,i) => `
           <div class="prow">
             <span style="font-size:.65rem;color:var(--muted);width:14px;text-align:center">${i+1}</span>
-            <img class="pav" src="${p.av}" onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
+            <img class="pav" src="${getAvatar(p)}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.u)}&background=ffd700&color=000'">
             <div class="pinfo"><div class="pname">${esc(p.name || p.nick || p.u)}</div><div class="pun">@${esc(p.u)}</div></div>
             <span class="pcoins">${p.coins}🪙</span>
             <button class="qb" onclick="delta('${p.u}',10)">+10</button>
