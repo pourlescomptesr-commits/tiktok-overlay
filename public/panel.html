@@ -90,56 +90,65 @@ input[type="color"]{width:24px;height:24px;border-radius:50%;border:2px solid va
 .ov-pill.snipe.hot{border-color:var(--red)}
 .ov-pill .hl{color:var(--gold);transition:color .3s}
 .ov-pill.snipe .hl{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:.64rem}
-
-.rrows{width:100%;display:flex;flex-direction:column;gap:5px}
-.rrow{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border)}
-.rrow.r1{background:linear-gradient(90deg,rgba(255,215,0,.15),transparent);border-color:rgba(255,215,0,.35)}
-.rrow.r2{background:linear-gradient(90deg,rgba(192,192,192,.12),transparent);border-color:rgba(192,192,192,.25)}
-.rrow.r3{background:linear-gradient(90deg,rgba(205,127,50,.12),transparent);border-color:rgba(205,127,50,.25)}
-
-.rbadge{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.08);font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.r1 .rbadge{background:var(--gold);color:#000}.r2 .rbadge{background:#c0c0c0;color:#000}.r3 .rbadge{background:#cd7f32;color:#fff}
-.rav{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#222}
+.ov-pill.snipe.hot .hl{background:var(--red)}
+.ov-timer{font-family:'Share Tech Mono',monospace;font-size:3rem;color:#39ff14;text-shadow:0 0 14px rgba(57,255,20,.5);letter-spacing:2px;line-height:1;transition:color .3s}
+.ov-timer.warn{color:#ffaa00;text-shadow:0 0 14px rgba(255,170,0,.7)}
+.ov-timer.snipe{color:var(--red);text-shadow:0 0 14px rgba(255,59,92,.7);animation:blink .8s ease infinite alternate}
+.ranks{width:100%;display:flex;flex-direction:column;gap:6px}
+.rrow{background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:6px 10px;display:flex;align-items:center;gap:8px;height:46px;transition:border-color .3s,box-shadow .3s}
+.rrow.r1{border-color:rgba(255,215,0,.35);box-shadow:0 0 8px rgba(255,215,0,.1)}
+.rrow.r2{border-color:rgba(180,180,190,.25)}
+.rrow.r3{border-color:rgba(205,127,50,.25)}
+.rbadge{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;flex-shrink:0;background:rgba(255,255,255,.07);color:rgba(255,255,255,.35)}
+.r1 .rbadge{background:var(--gold);color:#000;box-shadow:0 0 7px rgba(255,215,0,.5)}
+.r2 .rbadge{background:#b4b4be;color:#000}
+.r3 .rbadge{background:#cd7f32;color:#fff}
+.rav{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.12);flex-shrink:0;background:rgba(255,255,255,.04)}
 .rname{flex:1;font-size:.78rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rcoins{font-size:.78rem;font-weight:800;color:var(--gold);display:flex;align-items:center;gap:4px;flex-shrink:0}
-.ddots{display:inline-flex;gap:2px}.dd{width:3px;height:3px;background:var(--gold);border-radius:50%}
+.rcoins{font-size:.8rem;font-weight:800;display:flex;align-items:center;gap:4px}
+.ddots{display:flex;gap:2px}
+.dd{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 3px var(--gold)}
+.ov-bot{background:rgba(0,0,0,.85);border:1.5px solid rgba(127,0,255,.4);border-radius:20px;padding:3px 13px;font-size:.68rem;font-weight:700;display:flex;align-items:center;gap:5px}
 
-.plist-wrap{background:var(--card);border-top:1px solid var(--border);padding:14px 20px;max-height:220px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
-.plist-head{display:flex;align-items:center;justify-content:space-between}
-.plist-title{font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
-.plist{display:flex;flex-direction:column;gap:6px}
-.prow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:7px 12px}
-.pav{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#222}
+.pp{border-top:1px solid var(--border);background:var(--card);padding:13px;display:flex;flex-direction:column;gap:9px;max-height:310px}
+.add-row{display:flex;gap:7px}
+.add-row input{flex:1}
+.plist{overflow-y:auto;display:flex;flex-direction:column;gap:5px;max-height:200px}
+.plist::-webkit-scrollbar{width:3px}.plist::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08)}
+.prow{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;padding:5px 9px;transition:border-color .2s}
+.prow:hover{border-color:rgba(255,255,255,.1)}
+.pav{width:27px;height:27px;border-radius:50%;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.05)}
 .pinfo{flex:1;overflow:hidden}
-.pname{font-size:.82rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pun{font-size:.68rem;color:var(--muted)}
-.pcoins{font-size:.85rem;font-weight:800;color:var(--gold);margin-right:4px}
-.qb{padding:4px 9px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:5px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;transition:all .15s}
-.qb:hover{background:rgba(255,255,255,.12)}
-.qb.del{color:var(--red);border-color:rgba(255,59,92,.3)}
-.qb.del:hover{background:rgba(255,59,92,.2)}
-.ci{width:70px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:5px;color:var(--gold);padding:3px 7px;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:700;outline:none}
+.pname{font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pun{font-size:.66rem;color:var(--muted)}
+.pcoins{font-weight:800;color:var(--gold);font-size:.85rem;margin:0 3px;white-space:nowrap}
+.qb{padding:2px 7px;font-size:.68rem;border-radius:5px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:#fff;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;transition:all .15s;flex-shrink:0}
+.qb:hover{background:rgba(255,255,255,.1)}
+.qb.del{color:var(--red);border-color:rgba(255,59,92,.2)}.qb.del:hover{background:rgba(255,59,92,.1)}
+.ci{width:58px;padding:2px 5px;font-size:.75rem;text-align:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;color:#fff;font-family:'Outfit',sans-serif;outline:none}
 .ci:focus{border-color:var(--gold)}
-.empty{text-align:center;padding:20px;color:var(--muted);font-size:.82rem;font-style:italic}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--gold);color:#000;padding:10px 18px;border-radius:8px;font-weight:800;font-size:.82rem;display:none;z-index:999;box-shadow:0 4px 15px rgba(0,0,0,.4)}
+.empty{text-align:center;color:var(--muted);font-size:.78rem;padding:12px}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:7px 20px;border-radius:8px;font-weight:700;font-size:.82rem;z-index:999;display:none;animation:pop .2s ease}
+@keyframes pop{from{transform:translateX(-50%) scale(.9)}to{transform:translateX(-50%) scale(1)}}
 </style>
 </head>
 <body>
 
 <div class="bar">
-  <div class="logo">Auction Live</div>
+  <div class="logo">🎯 Auction Live</div>
   <div class="divider"></div>
-  <div class="cf-pill" onclick="copyCf()" title="Cliquer pour copier l'URL publique">
-    <span style="color:var(--muted);font-size:.65rem;font-weight:700;text-transform:uppercase">Lien Public</span>
-    <span class="cf-url cf-wait" id="cf-url">Generation du lien Cloudflare...</span>
-    <span style="font-size:.68rem">📋</span>
+  <div class="cf-pill" onclick="copyCf()" title="Cliquer pour copier">
+    <span>🌍</span>
+    <span class="cf-wait cf-url" id="cf-url">Lien Cloudflare en attente...</span>
+    <span style="font-size:.6rem;color:var(--muted)">📋</span>
   </div>
   <div class="tik-pill">
-    <div class="dot r" id="tik-dot"></div>
+    <span class="dot r" id="tik-dot"></span>
     <span id="tik-txt">TikTok OFF</span>
   </div>
   <div class="bar-r">
-    <div class="key-badge" id="key-badge">CLÉ: ...</div>
+    <span class="key-badge" id="key-badge">CLÉ: ---</span>
     <button class="btn-ov" onclick="copyOv()">📺 Copier Overlay</button>
     <button class="btn-logout" onclick="logout()">Déconnexion</button>
   </div>
@@ -147,10 +156,12 @@ input[type="color"]{width:24px;height:24px;border-radius:50%;border:2px solid va
 
 <div class="main">
   <div class="side">
-    <div class="stitle">Chronomètre</div>
-    <div class="chrono-card">
-      <div class="chrono-num" id="cn">01:00</div>
-      <div class="chrono-lbl" id="cl">En attente</div>
+    <div>
+      <div class="stitle">⏱ Chronomètre</div>
+      <div class="chrono-card">
+        <div class="chrono-num" id="cn">01:00</div>
+        <div class="chrono-lbl" id="cl">En attente</div>
+      </div>
     </div>
     <div class="brow">
       <button class="b bg2" onclick="timer('start')">▶ Start</button>
@@ -158,93 +169,84 @@ input[type="color"]{width:24px;height:24px;border-radius:50%;border:2px solid va
       <button class="b br"  onclick="timer('reset')">↺ Reset</button>
     </div>
     <div class="g2">
-      <div class="f">
-        <label>Durée (sec)</label>
-        <input type="number" id="c-dur" value="60" onchange="setTimer()">
+      <div class="f"><label>Durée (sec)</label><input id="c-dur" type="number" value="60" min="5" onchange="setTimer()"></div>
+      <div class="f"><label>Snipe Delay (s)</label><input id="c-snipe" type="number" value="10" min="0" onchange="setTimer()"></div>
+    </div>
+
+    <hr class="sep">
+    <div>
+      <div class="stitle">🎯 Minimum d'enchère</div>
+      <div class="g2">
+        <div class="f">
+          <label>Option</label>
+          <select id="min-mode" onchange="updateMinConfig()">
+            <option value="none">Pas de minimum</option>
+            <option value="min">Minimum fixe</option>
+          </select>
+        </div>
+        <div class="f" id="min-val-box" style="display:none">
+          <label>Montant 🪙</label>
+          <input id="min-val-input" type="number" value="10" min="1" onchange="updateMinConfig()">
+        </div>
       </div>
-      <div class="f">
-        <label>Snipe Delay (sec)</label>
-        <input type="number" id="c-snipe" value="10" onchange="setTimer()">
+    </div>
+
+    <hr class="sep">
+    <div>
+      <div class="stitle">🎨 Couleur</div>
+      <div class="crow">
+        <div class="cd on" style="background:#ffd700" onclick="setColor('#ffd700',this)"></div>
+        <div class="cd" style="background:#fff" onclick="setColor('#ffffff',this)"></div>
+        <div class="cd" style="background:#ff007f" onclick="setColor('#ff007f',this)"></div>
+        <div class="cd" style="background:#9c27b0" onclick="setColor('#9c27b0',this)"></div>
+        <div class="cd" style="background:#00bcd4" onclick="setColor('#00bcd4',this)"></div>
+        <div class="cd" style="background:#00e676" onclick="setColor('#00e676',this)"></div>
+        <div class="cd" style="background:#ff3b5c" onclick="setColor('#ff3b5c',this)"></div>
+        <input type="color" value="#ffd700" onchange="setColor(this.value,null)">
       </div>
     </div>
 
     <hr class="sep">
-
-    <div class="stitle">Minimum d'Enchère</div>
-    <div class="f">
-      <label>Option</label>
-      <select id="min-mode" onchange="updateMinConfig()">
-        <option value="none">Pas de minimum</option>
-        <option value="min">Minimum fixe</option>
-      </select>
+    <div>
+      <div class="stitle">🔴 TikTok Live</div>
+      <div style="display:flex;gap:7px">
+        <div class="f" style="flex:1"><input id="tt-user" type="text" placeholder="@votre_tiktok"></div>
+        <button class="b br" style="flex:none;width:auto;padding:0 12px" onclick="tikConnect()">LIVE</button>
+        <button class="b bgr" style="flex:none;width:36px;padding:0" onclick="tikDisconnect()" title="Stop">✕</button>
+      </div>
+      <p style="font-size:.65rem;color:var(--muted);margin-top:6px;line-height:1.4">Les cadeaux TikTok sont convertis automatiquement en pièces.</p>
     </div>
-    <div class="f" id="min-val-box" style="display:none;margin-top:6px">
-      <label>Montant pièces min</label>
-      <input type="number" id="min-val-input" value="1" min="1" onchange="updateMinConfig()">
-    </div>
-
-    <hr class="sep">
-
-    <div class="stitle">Couleur</div>
-    <div class="crow">
-      <div class="cd on" style="background:#ffd700" onclick="setColor('#ffd700',this)"></div>
-      <div class="cd" style="background:#00e676" onclick="setColor('#00e676',this)"></div>
-      <div class="cd" style="background:#00c8ff" onclick="setColor('#00c8ff',this)"></div>
-      <div class="cd" style="background:#ff3b5c" onclick="setColor('#ff3b5c',this)"></div>
-      <div class="cd" style="background:#a000ff" onclick="setColor('#a000ff',this)"></div>
-      <div class="cd" style="background:#ff7700" onclick="setColor('#ff7700',this)"></div>
-      <input type="color" id="c-picker" value="#ffd700" onchange="setColor(this.value,null)">
-    </div>
-
-    <hr class="sep">
-
-    <div class="stitle">TikTok Live</div>
-    <div style="display:flex;gap:6px">
-      <input class="f" type="text" id="tt-user" placeholder="@votre_tiktok" style="flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--txt);padding:7px 10px;border-radius:7px;font-size:.82rem;outline:none">
-      <button class="b br" style="flex:none;padding:7px 14px" onclick="tikConnect()">LIVE</button>
-      <button class="b bgr" style="flex:none;padding:7px 10px" onclick="tikDisconnect()">✕</button>
-    </div>
-    <div style="font-size:.68rem;color:var(--muted);margin-top:3px">Les cadeaux TikTok sont convertis automatiquement en pièces.</div>
   </div>
 
   <div class="right">
     <div class="preview">
       <div class="ov-card" id="pv-card">
-        <div class="ov-top" id="pv-top">
-          <span>⭐</span><span id="pv-vouchers" style="color:var(--gold)">0 VOUCHES</span>
-        </div>
+        <div class="ov-top" id="pv-top">⭐ <span id="pv-coins">0</span> VOUCHES</div>
         <div class="ov-mid">
-          <div class="ov-pill min" id="pv-min" style="display:none"><span style="color:#00e676">✔</span> MIN : <span class="hl" id="pv-min-val">1</span> 🪙</div>
-          <div class="ov-pill snipe" id="pv-snipe-pill"><span>🛡</span> SNIPE <span class="hl" id="pv-snipe">10s</span></div>
+          <div class="ov-pill min" id="pv-min">✅ MIN : <span class="hl">1</span>🪙</div>
+          <div class="ov-pill snipe" id="pv-snipe">🛡️ SNIPE <span class="hl">10S</span></div>
         </div>
-        <div class="chrono-num" id="pv-timer" style="font-size:2.2rem">01:00</div>
-        <div class="rrows" id="pv-ranks"></div>
-        <div style="font-size:.65rem;color:var(--muted);font-weight:700">👥 Participants : <span id="pv-count" style="color:#fff">0</span></div>
+        <div class="ov-timer" id="pv-timer">01:00</div>
+        <div class="ranks" id="pv-ranks"></div>
+        <div class="ov-bot">👥 Participants : <span id="pv-tot">0</span></div>
       </div>
     </div>
 
-    <div class="plist-wrap">
-      <div class="plist-head">
-        <div class="plist-title">Joueurs — Ajouter / Gérer les pièces</div>
-        <button class="qb del" onclick="clearAll()">🗑 Tout effacer</button>
+    <div class="pp">
+      <div class="stitle" style="margin:0">👥 Joueurs — Ajouter / Gérer les pièces</div>
+      <div class="add-row">
+        <input id="p-u" type="text" placeholder="@pseudo_tiktok" onkeydown="if(event.key==='Enter')addP()">
+        <input id="p-c" type="number" value="100" min="0" style="width:80px" placeholder="🪙">
+        <button class="b bb" style="flex:none;width:auto;padding:0 13px" onclick="addP()">+ Ajouter</button>
+        <button class="b br" style="flex:none;width:36px;padding:0" onclick="clearAll()" title="Tout effacer">🗑</button>
       </div>
-
-      <div style="display:flex;gap:8px">
-        <input type="text" id="p-u" placeholder="@pseudo_tiktok" style="flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;color:var(--txt);padding:6px 10px;font-size:.8rem;outline:none">
-        <input type="number" id="p-c" placeholder="100" value="100" style="width:80px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;color:var(--gold);padding:6px 10px;font-size:.8rem;font-weight:700;outline:none">
-        <button class="b bb" style="flex:none;padding:6px 14px" onclick="addP()">+ Ajouter</button>
+      <div class="add-row" style="margin-top:2px;gap:5px">
+        <button class="b bgr" style="font-size:0.7rem;padding:4px 8px" onclick="equalizeTop2()">⚖️ Égaliser #1 & #2</button>
+        <button class="b bgr" style="font-size:0.7rem;padding:4px 8px" onclick="equalizeTop3()">⚖️ Égaliser Top 3</button>
+        <button class="b bgr" style="font-size:0.7rem;padding:4px 8px" onclick="swapTop2()">🔀 Inverser #1 & #2</button>
+        <button class="b br"  style="font-size:0.7rem;padding:4px 8px" onclick="resetCoins()">🧹 RAZ Pièces</button>
       </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:6px">
-        <button class="qb" onclick="equalizeTop2()">⚖️ Égaliser #1 & #2</button>
-        <button class="qb" onclick="equalizeTop3()">⚖️ Égaliser Top 3</button>
-        <button class="qb" onclick="swapTop2()">🔀 Inverser #1 & #2</button>
-        <button class="qb del" onclick="resetCoins()">🧹 RAZ Pièces</button>
-      </div>
-
-      <div class="plist" id="plist">
-        <div class="empty">Aucun joueur pour l'instant</div>
-      </div>
+      <div class="plist" id="plist"></div>
     </div>
   </div>
 </div>
@@ -322,39 +324,42 @@ function render(s) {
   if (cl) cl.textContent = s.snipe_on?'🚨 SNIPE DELAY !':s.timer_on?'En cours...':s.timer_rem===0?'Terminé !':'En attente';
 
   const c = s.color||'#ffd700';
-  document.documentElement.style.setProperty('--gold', c);
-  const cp = document.getElementById('c-picker'); if (cp) cp.value = c;
-  const pcard = document.getElementById('pv-card'), ptop = document.getElementById('pv-top');
-  if (pcard) pcard.style.borderColor = c;
-  if (ptop) ptop.style.borderColor = c;
+  const card = document.getElementById('pv-card');
+  if (card) { card.style.borderColor = c; card.style.boxShadow = `0 0 28px ${c}35`; }
+  const pvTop = document.getElementById('pv-top');
+  if (pvTop) pvTop.style.borderColor = c;
+  const pvCoins = document.getElementById('pv-coins');
+  if (pvCoins) pvCoins.textContent = s.players.reduce((a,p)=>a+p.coins,0);
 
   const minPill = document.getElementById('pv-min');
-  const minValSpan = document.getElementById('pv-min-val');
-  const minSelect = document.getElementById('min-mode');
-  const minInput = document.getElementById('min-val-input');
-  const minBox = document.getElementById('min-val-box');
-  
-  if (s.min_bid_enabled) {
-    if (minPill) minPill.style.display = 'flex';
-    if (minValSpan) minValSpan.textContent = s.min_bid_val || 1;
-    if (minSelect) minSelect.value = 'min';
-    if (minInput) minInput.value = s.min_bid_val || 1;
-    if (minBox) minBox.style.display = 'block';
-  } else {
-    if (minPill) minPill.style.display = 'none';
-    if (minSelect) minSelect.value = 'none';
-    if (minBox) minBox.style.display = 'none';
+  if (minPill) {
+    minPill.style.borderColor = c;
+    if (s.min_bid_enabled) {
+      minPill.style.display = 'flex';
+      minPill.innerHTML = `✅ MIN : <span class="hl">${s.min_bid_val||1}</span>🪙`;
+    } else {
+      minPill.style.display = 'none';
+    }
   }
 
-  const snp = document.getElementById('pv-snipe-pill'), sn = document.getElementById('pv-snipe');
-  if (sn) sn.textContent = `${s.snipe_dur}s`;
-  if (snp) {
-    if (s.snipe_on) snp.classList.add('hot');
-    else snp.classList.remove('hot');
+  if (document.activeElement !== document.getElementById('min-mode') && document.activeElement !== document.getElementById('min-val-input')) {
+    const mm = document.getElementById('min-mode'), mv = document.getElementById('min-val-box'), mvi = document.getElementById('min-val-input');
+    if (mm) mm.value = s.min_bid_enabled ? 'min' : 'none';
+    if (mv) mv.style.display = s.min_bid_enabled ? 'block' : 'none';
+    if (mvi && s.min_bid_val) mvi.value = s.min_bid_val;
   }
-
-  const pc = document.getElementById('pv-count');
-  if (pc) pc.textContent = s.players.length;
+  const sEl = document.getElementById('pv-snipe');
+  if (sEl) {
+    sEl.className = 'ov-pill snipe' + (s.snipe_on?' hot':'');
+    sEl.innerHTML = `🛡️ SNIPE <span class="hl">${s.snipe_on?Math.ceil(s.snipe_rem)+'S':Math.ceil(s.snipe_dur)+'S'}</span>`;
+  }
+  const pt = document.getElementById('pv-timer');
+  if (pt) {
+    pt.textContent = fmt(sec);
+    pt.className = 'ov-timer' + (s.snipe_on?' snipe':s.timer_on&&s.timer_rem<s.snipe_dur?' warn':'');
+  }
+  const pvTot = document.getElementById('pv-tot');
+  if (pvTot) pvTot.textContent = s.players.length;
 
   const top3 = s.players.slice(0,3);
   const pvRanks = document.getElementById('pv-ranks');
