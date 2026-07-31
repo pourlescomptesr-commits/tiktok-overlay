@@ -66,6 +66,7 @@ def get_store(key):
             "last_t": time.time(),
             "min_bid_enabled": False,
             "min_bid_val": 1,
+            "vouches_val": "100 VOUCHES",
             "color": "#ffd700",
             "tiktok": "off",
             "tiktok_user": "",
@@ -118,6 +119,7 @@ def get_public_state(s):
         "snipe_on": s["snipe_on"],
         "min_bid_enabled": s["min_bid_enabled"],
         "min_bid_val": s["min_bid_val"],
+        "vouches_val": s.get("vouches_val", "100 VOUCHES"),
         "color": s["color"],
         "tiktok": s["tiktok"],
         "tiktok_user": s["tiktok_user"],
@@ -262,6 +264,8 @@ def api_config():
     if 'min_bid_val' in data:
         try: s["min_bid_val"] = max(1, int(data['min_bid_val']))
         except Exception: pass
+    if 'vouches_val' in data:
+        s["vouches_val"] = str(data['vouches_val'])
     if 'color' in data: s["color"] = str(data['color'])
 
     notify(s)
@@ -289,7 +293,7 @@ def api_players():
                     "u": u,
                     "nick": u,
                     "name": u,
-                    "av": f"https://api.dicebear.com/7.x/initials/svg?seed={u}",
+                    "av": f"https://unavatar.io/tiktok/{u}",
                     "coins": coins
                 })
             trigger_snipe_check(s)
@@ -413,6 +417,9 @@ def api_internal_gift():
     if s["min_bid_enabled"] and coins < s["min_bid_val"]:
         return jsonify(ok=True, ignored="sous le minimum")
 
+    if not av or 'dicebear' in av:
+        av = f"https://unavatar.io/tiktok/{u}"
+
     ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
     if ex:
         ex["coins"] += coins
@@ -422,7 +429,7 @@ def api_internal_gift():
         if av: ex["av"] = av
     else:
         s["players"].append({
-            "u": u, "nick": nick or u, "name": nick or u, "av": av or f"https://api.dicebear.com/7.x/initials/svg?seed={u}",
+            "u": u, "nick": nick or u, "name": nick or u, "av": av or f"https://unavatar.io/tiktok/{u}",
             "coins": coins
         })
 
