@@ -12,11 +12,11 @@
   --pink: #ff007f;
   --cyan: #00f3ff;
   --purple: #9d00ff;
-  --card-bg: rgba(10, 12, 24, 0.78);
+  --card-bg: rgba(10, 12, 24, 0.82);
   --border: rgba(255, 215, 0, 0.2);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; cursor: none !important; }
 body {
   font-family: 'Outfit', sans-serif;
   background: var(--bg);
@@ -26,14 +26,11 @@ body {
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  cursor: default;
 }
 
 #canvas-bg {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  z-index: 0;
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; z-index: 0;
   pointer-events: none;
 }
 
@@ -41,11 +38,9 @@ body {
   width: 24px; height: 24px;
   border: 2px solid var(--gold);
   border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
+  position: fixed; pointer-events: none; z-index: 9999;
   transform: translate(-50%, -50%);
-  transition: transform 0.08s ease, width 0.2s, height 0.2s, background-color 0.2s;
+  transition: transform 0.05s ease, width 0.2s, height 0.2s;
   box-shadow: 0 0 15px var(--gold), inset 0 0 10px var(--pink);
   mix-blend-mode: screen;
 }
@@ -53,9 +48,7 @@ body {
   width: 6px; height: 6px;
   background: #fff;
   border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 10000;
+  position: fixed; pointer-events: none; z-index: 10000;
   transform: translate(-50%, -50%);
   box-shadow: 0 0 10px #fff;
 }
@@ -66,9 +59,7 @@ body {
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 50px 50px;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.7;
+  z-index: 1; pointer-events: none; opacity: 0.7;
 }
 
 .topbar {
@@ -120,7 +111,7 @@ body {
   position: relative;
   box-shadow: 0 30px 100px rgba(0,0,0,0.8), 0 0 50px rgba(0, 243, 255, 0.1);
   transform-style: preserve-3d;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.2s ease-out;
   overflow: hidden;
 }
 
@@ -261,8 +252,8 @@ class Particle {
     this.x = x || Math.random() * width;
     this.y = y || Math.random() * height;
     this.size = Math.random() * 2.5 + 0.5;
-    this.speedX = (Math.random() - 0.5) * 1.5;
-    this.speedY = (Math.random() - 0.5) * 1.5;
+    this.speedX = (Math.random() - 0.5) * 1.2;
+    this.speedY = (Math.random() - 0.5) * 1.2;
     this.color = ['#ffd700', '#ff007f', '#00f3ff', '#9d00ff'][Math.floor(Math.random()*4)];
     this.alpha = Math.random() * 0.8 + 0.2;
   }
@@ -328,8 +319,8 @@ window.addEventListener('mousemove', (e) => {
 
   if (Math.random() > 0.4) {
     const p = new Particle(e.clientX, e.clientY);
-    p.speedX = (Math.random() - 0.5) * 3;
-    p.speedY = (Math.random() - 0.5) * 3;
+    p.speedX = (Math.random() - 0.5) * 2;
+    p.speedY = (Math.random() - 0.5) * 2;
     particles.push(p);
     if (particles.length > 120) particles.shift();
   }
@@ -337,8 +328,10 @@ window.addEventListener('mousemove', (e) => {
   const rect = cardWrapper.getBoundingClientRect();
   const cardX = rect.left + rect.width / 2;
   const cardY = rect.top + rect.height / 2;
-  const rotX = (e.clientY - cardY) / 20;
-  const rotY = -(e.clientX - cardX) / 20;
+  const rawX = (e.clientY - cardY) / 35;
+  const rawY = -(e.clientX - cardX) / 35;
+  const rotX = Math.max(-8, Math.min(8, rawX));
+  const rotY = Math.max(-8, Math.min(8, rawY));
   card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
 });
 
