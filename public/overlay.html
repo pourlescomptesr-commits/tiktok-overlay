@@ -22,7 +22,7 @@ html,body{width:100vw;height:100vh;background:transparent;display:flex;justify-c
 .ov-pill.snipe{border:1.5px solid rgba(255,255,255,.15)}
 .ov-pill.snipe.hot{border-color:#ff3b5c}
 .ov-pill .hl{color:#ffd700;transition:color .3s}
-.ov-pill.snipe .hl{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:.66rem}
+.ov-pill.snipe .hl{background:rgba(255,255,255,.1);padding:1px 4px;border-radius:4px;font-size:.66rem}
 .ov-pill.snipe.hot .hl{background:#ff3b5c}
 .ov-timer{font-family:'Share Tech Mono',monospace;font-size:3.2rem;color:#39ff14;
   text-shadow:0 0 16px rgba(57,255,20,.55);letter-spacing:2px;line-height:1;transition:color .3s}
@@ -57,7 +57,7 @@ html,body{width:100vw;height:100vh;background:transparent;display:flex;justify-c
 <body>
 
 <div class="ov-card" id="ov-card">
-  <div class="ov-top" id="ov-top">⭐ <span id="ov-coins">0</span> VOUCHES</div>
+  <div class="ov-top" id="ov-top">⭐ <span id="ov-vouch">100 VOUCHES</span></div>
   <div class="ov-mid">
     <div class="ov-pill min" id="ov-min">✅ MIN : <span class="hl">1</span>🪙</div>
     <div class="ov-pill snipe" id="ov-snipe">🛡️ SNIPE <span class="hl">10S</span></div>
@@ -100,7 +100,7 @@ function render(s) {
   const card = document.getElementById('ov-card');
   card.style.borderColor = c; card.style.boxShadow = `0 0 30px ${c}38`;
   document.getElementById('ov-top').style.borderColor = c;
-  document.getElementById('ov-coins').textContent = s.players.reduce((a,p)=>a+p.coins,0);
+  document.getElementById('ov-vouch').textContent = s.vouches_val || '100 VOUCHES';
   const minPill = document.getElementById('ov-min');
   minPill.style.borderColor = c;
   if (s.min_bid_enabled) {
@@ -126,7 +126,7 @@ function render(s) {
     return p ? `<div class="rrow ${cls}">
       <div class="rbadge">${i+1}</div>
       <img class="rav" src="${p.av}" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
-      <div class="rname">${esc(p.name)}</div>
+      <div class="rname">${esc(p.name || p.nick || p.u)}</div>
       <div class="rcoins">${p.coins}<div class="ddots"><div class="dd"></div><div class="dd"></div></div></div>
     </div>` :
     `<div class="rrow" style="opacity:.25"><div class="rbadge">${i+1}</div><div class="rav"></div><div class="rname" style="color:#444">—</div></div>`;
