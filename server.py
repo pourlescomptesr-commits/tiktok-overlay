@@ -93,6 +93,20 @@ def update_timer(s):
         if s["timer_rem"] <= 0:
             s["timer_rem"] = 0
             s["timer_on"] = False
+            s["snipe_on"] = False
+        elif s["timer_rem"] <= s["snipe_dur"] and s["snipe_dur"] > 0:
+            s["snipe_on"] = True
+            s["snipe_rem"] = s["snipe_dur"]
+
+def trigger_snipe_check(s):
+    if s["snipe_on"]:
+        s["snipe_rem"] = s["snipe_dur"]
+    elif s["timer_on"]:
+        if s["timer_rem"] <= s["snipe_dur"] and s["snipe_dur"] > 0:
+            s["snipe_on"] = True
+            s["snipe_rem"] = s["snipe_dur"]
+        else:
+            s["timer_rem"] = min(s["timer_dur"], s["timer_rem"] + s["snipe_dur"])
 
 def notify(s):
     payload = json.dumps(get_public_state(s))
@@ -253,6 +267,8 @@ def api_timer():
     elif a == 'set':
         if not s["timer_on"] and not s["snipe_on"]:
             s["timer_rem"] = s["timer_dur"]
+    elif a == 'add_time':
+        trigger_snipe_check(s)
 
     notify(s)
     return jsonify(ok=True, state=get_public_state(s))
@@ -343,13 +359,6 @@ def api_players():
 
     notify(s)
     return jsonify(ok=True, state=get_public_state(s))
-
-def trigger_snipe_check(s):
-    if s["timer_on"] and not s["snipe_on"]:
-        if s["timer_rem"] <= s["snipe_dur"]:
-            s["snipe_on"] = True
-            s["snipe_rem"] = s["snipe_dur"]
-            s["timer_on"] = False
 
 @app.route('/api/tiktok', methods=['POST'])
 def api_tiktok():
