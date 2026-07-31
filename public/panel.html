@@ -117,15 +117,16 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:#e8eaf6;min-heig
         <button class="b br" style="flex:1" onclick="timer('reset')">↺ Reset</button>
       </div>
       <div class="grid2" style="margin-top:12px">
-        <div class="f"><label>Durée (sec)</label><input id="c-dur" type="number" value="60" min="5" onchange="setTimer()"></div>
-        <div class="f"><label>Snipe Delay (sec)</label><input id="c-snipe" type="number" value="10" min="0" onchange="setTimer()"></div>
+        <div class="f"><label>Durée (sec)</label><input id="c-dur" type="number" value="60" min="5" oninput="setTimer()" onchange="setTimer()"></div>
+        <div class="f"><label>Snipe Delay (sec)</label><input id="c-snipe" type="number" value="10" min="0" oninput="setTimer()" onchange="setTimer()"></div>
       </div>
+      <button class="b bgr" style="width:100%;margin-top:8px;justify-content:center" onclick="setTimer()">⚙ Valider les Temps</button>
     </div>
 
     <div class="card">
       <div class="stitle">⭐ Récompense / Vouches</div>
       <div class="f">
-        <input id="vouch-input" type="text" value="100 VOUCHES" placeholder="EX: 100 VOUCHES" onchange="updateVouchesConfig()">
+        <input id="vouch-input" type="text" value="100 VOUCHES" placeholder="EX: 100 VOUCHES" oninput="updateVouchesConfig()" onchange="updateVouchesConfig()">
       </div>
     </div>
 
@@ -141,7 +142,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:#e8eaf6;min-heig
         </div>
         <div class="f" id="min-val-box" style="display:none">
           <label>Montant 🪙</label>
-          <input id="min-val-input" type="number" value="10" min="1" onchange="updateMinConfig()">
+          <input id="min-val-input" type="number" value="10" min="1" oninput="updateMinConfig()" onchange="updateMinConfig()">
         </div>
       </div>
     </div>
@@ -266,6 +267,12 @@ function render(s) {
     }
   }
 
+  if (document.activeElement !== document.getElementById('c-dur') && document.activeElement !== document.getElementById('c-snipe')) {
+    const cd = document.getElementById('c-dur'), cs = document.getElementById('c-snipe');
+    if (cd && s.timer_dur) cd.value = s.timer_dur;
+    if (cs && s.snipe_dur) cs.value = s.snipe_dur;
+  }
+
   if (document.activeElement !== document.getElementById('vouch-input')) {
     const vi = document.getElementById('vouch-input');
     if (vi) vi.value = s.vouches_val || '100 VOUCHES';
@@ -298,7 +305,7 @@ function render(s) {
       const p = top3[i], cls=['r1','r2','r3'][i];
       return p ? `<div class="rrow ${cls}">
         <div class="rbadge">${i+1}</div>
-        <img class="rav" src="${p.av}" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
+        <img class="rav" src="${p.av}" onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
         <div class="rname">${esc(p.name || p.nick || p.u)}</div>
         <div class="rcoins">${p.coins}<div class="ddots"><div class="dd"></div><div class="dd"></div></div></div>
       </div>` :
@@ -317,7 +324,7 @@ function render(s) {
         pl.innerHTML = s.players.map((p,i) => `
           <div class="prow">
             <span style="font-size:.65rem;color:var(--muted);width:14px;text-align:center">${i+1}</span>
-            <img class="pav" src="${p.av}" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
+            <img class="pav" src="${p.av}" onerror="this.onerror=null;this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.u)}'">
             <div class="pinfo"><div class="pname">${esc(p.name || p.nick || p.u)}</div><div class="pun">@${esc(p.u)}</div></div>
             <span class="pcoins">${p.coins}🪙</span>
             <button class="qb" onclick="delta('${p.u}',10)">+10</button>
@@ -340,7 +347,7 @@ const api = (url, body) => fetch(url, {
 });
 
 function timer(action)   { api('/api/timer', {action}); }
-function setTimer()      { api('/api/timer', {action:'set', dur:+document.getElementById('c-dur').value||60, snipe:+document.getElementById('c-snipe').value||10}); }
+function setTimer()      { api('/api/timer', {action:'set', duration:+document.getElementById('c-dur').value||60, snipe_delay:+document.getElementById('c-snipe').value||10}); }
 function setColor(c,el)  { document.querySelectorAll('.cd.on').forEach(d=>d.classList.remove('on')); if(el)el.classList.add('on'); api('/api/color',{color:c}); }
 function tikConnect()    { const u=document.getElementById('tt-user').value.trim(); if(u) api('/api/tiktok',{action:'connect',user:u}); }
 function tikDisconnect() { api('/api/tiktok',{action:'disconnect'}); }
