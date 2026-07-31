@@ -391,7 +391,7 @@ def api_internal_tiktok_status():
         s = STORES[k]
         s["tiktok"] = st
         if st == 'on': s["tiktok_user"] = u
-        elif st == 'off': s["tiktok_user'] = ''
+        elif st == 'off': s["tiktok_user"] = ''
         notify(s)
         return jsonify(ok=True)
     return jsonify(error="Store introuvable"), 404
