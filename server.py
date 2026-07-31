@@ -138,7 +138,7 @@ def route_root():
     k = get_key_strict()
     if k:
         return redirect(f'/panel?key={k}')
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(app.static_folder, 'login.html')
 
 @app.route('/panel')
 def route_panel():
