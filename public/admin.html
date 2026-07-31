@@ -2,79 +2,138 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Gestion des Clés</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Outfit',sans-serif;background:#07080f;color:#e8eaf6;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
-:root{--border:rgba(255,255,255,0.08);--card:#0f1019;--muted:#555972;--accent:#9c27b0;--green:#00e676;--red:#ff3b5c}
-
-#lock-screen{width:380px;text-align:center;position:relative;z-index:1}
-.lock-icon{font-size:3rem;display:block;margin-bottom:16px}
-.lock-title{font-size:1.4rem;font-weight:900;letter-spacing:1px;
-  background:linear-gradient(135deg,#ce93d8,#9c27b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
-.lock-sub{font-size:0.8rem;color:var(--muted);margin-bottom:28px}
-.lock-input{
-  width:100%;padding:15px 20px;background:rgba(255,255,255,0.04);
-  border:1.5px solid var(--border);border-radius:12px;color:#fff;
-  font-family:'Outfit',sans-serif;font-size:1rem;font-weight:600;
-  text-align:center;letter-spacing:2px;outline:none;transition:border-color 0.2s;margin-bottom:12px;
+:root {
+  --bg: #070614;
+  --surface: rgba(13, 11, 38, 0.88);
+  --border: rgba(107, 17, 255, 0.35);
+  --cyan: #00f3ff;
+  --violet: #6b11ff;
+  --neon-purple: #b026ff;
+  --green: #00e676;
+  --red: #ff3b5c;
+  --muted: rgba(255, 255, 255, 0.5);
 }
-.lock-input:focus{border-color:var(--accent)}
-.lock-btn{
-  width:100%;padding:15px;background:linear-gradient(135deg,#9c27b0,#7b1fa2);
-  border:none;border-radius:12px;color:#fff;font-family:'Outfit',sans-serif;
-  font-weight:800;font-size:0.92rem;letter-spacing:1px;cursor:pointer;
+
+* { box-sizing: border-box; margin: 0; padding: 0; cursor: none !important; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: #e8eaf6;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  overflow-x: hidden; position: relative;
 }
-.lock-err{margin-top:12px;color:var(--red);font-size:0.82rem;display:none}
 
-#admin-screen{width:100%;max-width:760px;padding:24px;display:none;flex-direction:column;gap:20px;position:relative;z-index:1}
-.header{display:flex;align-items:center;gap:12px}
-.htitle{font-size:1.2rem;font-weight:900;letter-spacing:1px;
-  background:linear-gradient(135deg,#ce93d8,#9c27b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.back-link{margin-left:auto;font-size:0.8rem;color:var(--muted);text-decoration:none}
-.back-link:hover{color:#fff}
-
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px}
-.ctitle{font-size:0.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
-
-.row{display:flex;gap:10px}
-.create-input{
-  flex:1;padding:12px 16px;background:rgba(255,255,255,0.04);
-  border:1px solid var(--border);border-radius:9px;color:#fff;
-  font-family:'Outfit',sans-serif;font-size:0.9rem;outline:none;
+#canvas-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+.nebula-overlay {
+  position: fixed; inset: 0;
+  background: radial-gradient(circle at 50% 20%, rgba(107, 17, 255, 0.18) 0%, rgba(0, 243, 255, 0.05) 50%, transparent 80%);
+  z-index: 1; pointer-events: none;
 }
-.create-input:focus{border-color:var(--accent)}
-.btn{
-  padding:10px 18px;border:none;border-radius:9px;cursor:pointer;
-  font-family:'Outfit',sans-serif;font-weight:700;font-size:0.82rem;transition:all 0.15s;
-}
-.btn-purple{background:linear-gradient(135deg,#9c27b0,#7b1fa2);color:#fff}
-.btn-purple:hover{filter:brightness(1.15)}
-.btn-red{background:rgba(255,59,92,0.15);border:1px solid rgba(255,59,92,0.3);color:var(--red)}
-.btn-green{background:rgba(0,230,118,0.12);border:1px solid rgba(0,230,118,0.3);color:var(--green)}
 
-.table{width:100%;border-collapse:collapse}
-.table th{font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
-.table td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.85rem;vertical-align:middle}
-.key-code{
-  font-family:monospace;font-size:0.85rem;color:#ce93d8;letter-spacing:1.5px;
-  cursor:pointer;padding:4px 8px;background:rgba(156,33,170,0.1);border-radius:6px;
-  display:inline-flex;align-items:center;gap:6px;
+.custom-cursor {
+  width: 24px; height: 24px; border: 2px solid var(--cyan); border-radius: 50%;
+  position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
+  transition: transform 0.04s ease; box-shadow: 0 0 20px var(--cyan);
 }
-.key-code:hover{background:rgba(156,33,170,0.25)}
-.sbadge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.7rem;font-weight:800}
-.sbadge.on{background:rgba(0,230,118,0.12);color:var(--green)}
-.sbadge.off{background:rgba(255,59,92,0.1);color:var(--red)}
+.custom-cursor-dot {
+  width: 6px; height: 6px; background: #fff; border-radius: 50%;
+  position: fixed; pointer-events: none; z-index: 10000; transform: translate(-50%, -50%);
+}
 
-.toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  background:#00e676;color:#000;padding:8px 22px;border-radius:10px;
-  font-weight:800;font-size:0.85rem;display:none;z-index:999;
+#lock-screen {
+  width: 420px; text-align: center; position: relative; z-index: 10;
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 28px;
+  padding: 42px 32px; backdrop-filter: blur(30px); box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+.lock-icon { font-size: 3.2rem; display: block; margin-bottom: 16px; }
+.lock-title {
+  font-size: 1.6rem; font-weight: 900; letter-spacing: 1px;
+  background: linear-gradient(135deg, #fff, var(--cyan), var(--neon-purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; text-transform: uppercase;
+}
+.lock-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 28px; font-weight: 700; }
+.lock-input {
+  width: 100%; padding: 16px 20px; background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--border); border-radius: 14px; color: #fff;
+  font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 600;
+  text-align: center; outline: none; transition: border-color 0.2s; margin-bottom: 14px;
+}
+.lock-input:focus { border-color: var(--cyan); background: rgba(0, 243, 255, 0.05); }
+.lock-btn {
+  width: 100%; padding: 16px; background: linear-gradient(135deg, var(--violet), var(--neon-purple));
+  border: 1.5px solid var(--cyan); border-radius: 14px; color: #fff; font-family: 'Outfit', sans-serif;
+  font-weight: 900; font-size: 0.95rem; letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+  box-shadow: 0 8px 30px rgba(107, 17, 255, 0.4); transition: transform 0.2s;
+}
+.lock-btn:hover { transform: translateY(-2px); }
+.lock-err { margin-top: 14px; color: var(--red); font-size: 0.85rem; font-weight: 800; display: none; }
+
+#admin-screen {
+  width: 100%; max-width: 860px; padding: 28px; display: none; flex-direction: column; gap: 22px; position: relative; z-index: 10;
+}
+.header { display: flex; align-items: center; gap: 14px; }
+.htitle {
+  font-size: 1.4rem; font-weight: 900; letter-spacing: 1px;
+  background: linear-gradient(135deg, #fff, var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.back-link { margin-left: auto; font-size: 0.82rem; font-weight: 800; color: var(--muted); text-decoration: none; }
+.back-link:hover { color: var(--cyan); }
+
+.card {
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 24px; padding: 26px;
+  display: flex; flex-direction: column; gap: 16px; backdrop-filter: blur(24px); box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+}
+.ctitle { font-size: 0.75rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+.row { display: flex; gap: 12px; }
+.create-input {
+  flex: 1; padding: 14px 18px; background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--border); border-radius: 12px; color: #fff;
+  font-family: 'Outfit', sans-serif; font-size: 0.92rem; font-weight: 700; outline: none;
+}
+.create-input:focus { border-color: var(--cyan); }
+.btn {
+  padding: 10px 18px; border: none; border-radius: 10px; cursor: pointer;
+  font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;
+}
+.btn-purple { background: linear-gradient(135deg, var(--violet), var(--neon-purple)); color: #fff; border: 1px solid var(--cyan); }
+.btn-purple:hover { transform: translateY(-2px); filter: brightness(1.2); }
+.btn-red { background: rgba(255,59,92,0.15); border: 1px solid rgba(255,59,92,0.4); color: var(--red); }
+.btn-red:hover { background: var(--red); color: #fff; }
+.btn-green { background: rgba(0,230,118,0.12); border: 1px solid rgba(0,230,118,0.4); color: var(--green); }
+.btn-green:hover { background: var(--green); color: #000; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table th { font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: left; padding: 12px 14px; border-bottom: 1.5px solid var(--border); }
+.table td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.88rem; vertical-align: middle; }
+.key-code {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; color: var(--cyan); font-weight: 700;
+  letter-spacing: 1.5px; cursor: pointer; padding: 6px 12px; background: rgba(0,243,255,0.1); border-radius: 8px;
+  display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(0,243,255,0.25);
+}
+.key-code:hover { background: rgba(0,243,255,0.25); }
+.sbadge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 900; }
+.sbadge.on { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+.sbadge.off { background: rgba(255,59,92,0.15); color: var(--red); border: 1px solid rgba(255,59,92,0.3); }
+
+.toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  background: var(--green); color: #000; padding: 12px 26px; border-radius: 12px;
+  font-weight: 900; font-size: 0.88rem; display: none; z-index: 999; box-shadow: 0 8px 25px rgba(0,230,118,0.4);
 }
 </style>
 </head>
 <body>
+
+<canvas id="canvas-bg"></canvas>
+<div class="nebula-overlay"></div>
+<div class="custom-cursor" id="cursor"></div>
+<div class="custom-cursor-dot" id="cursor-dot"></div>
 <div class="toast" id="toast"></div>
 
 <!-- ECRAN MDP -->
@@ -83,34 +142,88 @@ body{font-family:'Outfit',sans-serif;background:#07080f;color:#e8eaf6;min-height
   <div class="lock-title">Administration des Clés</div>
   <div class="lock-sub">Entrez le mot de passe administrateur</div>
   <input class="lock-input" id="pw" type="password" placeholder="Mot de passe..." onkeydown="if(event.key==='Enter')unlock()">
-  <button class="lock-btn" onclick="unlock()">Accéder →</button>
+  <button class="lock-btn" onclick="unlock()">Accéder au Panel →</button>
   <div class="lock-err" id="lock-err">❌ Mot de passe incorrect</div>
-  <a class="back-link" href="/" style="display:block;margin-top:16px">← Retour à la connexion</a>
+  <a class="back-link" href="/" style="display:block;margin-top:20px">← Retour à la connexion</a>
 </div>
 
 <!-- ECRAN GESTION -->
 <div id="admin-screen">
   <div class="header">
-    <span>🗝️</span>
-    <div class="htitle">Gestion des Clés</div>
-    <a class="back-link" href="/">← Retour à la connexion</a>
+    <span style="font-size:1.6rem">🗝️</span>
+    <div class="htitle">Gestion des Clés Streamer</div>
+    <a class="back-link" href="/">← Retour au Site</a>
   </div>
 
   <div class="card">
-    <div class="ctitle">Générer une nouvelle clé</div>
+    <div class="ctitle">➕ Générer une nouvelle clé client</div>
     <div class="row">
-      <input class="create-input" id="new-name" type="text" placeholder="Nom de l'utilisateur (ex: Streamer Jean)" onkeydown="if(event.key==='Enter')createKey()">
-      <button class="btn btn-purple" onclick="createKey()">+ Créer la clé</button>
+      <input class="create-input" id="new-name" type="text" placeholder="Nom du client (ex: Streamer Pro #1)" onkeydown="if(event.key==='Enter')createKey()">
+      <button class="btn btn-purple" onclick="createKey()">+ Créer la Clé</button>
     </div>
   </div>
 
   <div class="card">
-    <div class="ctitle">Clés actives</div>
+    <div class="ctitle">🔑 Liste des Clés et Statuts</div>
     <div id="keys-wrap"></div>
   </div>
 </div>
 
 <script>
+const canvas = document.getElementById('canvas-bg');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+});
+
+const particles = [];
+class Particle {
+  constructor(x, y, isTrail = false) {
+    this.x = x || Math.random() * width;
+    this.y = y || Math.random() * height;
+    this.size = isTrail ? Math.random() * 2.5 + 1 : Math.random() * 1.8 + 0.5;
+    this.speedX = (Math.random() - 0.5) * (isTrail ? 2 : 0.6);
+    this.speedY = (Math.random() - 0.5) * (isTrail ? 2 : 0.6);
+    this.color = ['#00f3ff', '#6b11ff', '#b026ff', '#ffffff'][Math.floor(Math.random()*4)];
+    this.alpha = isTrail ? 0.9 : Math.random() * 0.6 + 0.2;
+    this.life = isTrail ? 35 : 9999;
+  }
+  update() {
+    this.x += this.speedX; this.y += this.speedY;
+    if (this.life < 9999) { this.life--; this.alpha = this.life / 35; }
+    else {
+      if (this.x < 0 || this.x > width) this.speedX *= -1;
+      if (this.y < 0 || this.y > height) this.speedY *= -1;
+    }
+  }
+  draw() {
+    ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha); ctx.fillStyle = this.color;
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+}
+for (let i = 0; i < 70; i++) particles.push(new Particle());
+function animateParticles() {
+  ctx.clearRect(0, 0, width, height);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i]; p.update(); p.draw();
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursor-dot');
+window.addEventListener('mousemove', (e) => {
+  cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+  cursorDot.style.left = e.clientX + 'px'; cursorDot.style.top = e.clientY + 'px';
+  for (let i = 0; i < 2; i++) particles.push(new Particle(e.clientX, e.clientY, true));
+});
+
 let adminPw = null;
 
 async function unlock() {
@@ -127,9 +240,7 @@ async function unlock() {
       document.getElementById('lock-screen').style.display = 'none';
       document.getElementById('admin-screen').style.display = 'flex';
       loadKeys();
-    } else {
-      showErr();
-    }
+    } else { showErr(); }
   } catch { showErr(); }
 }
 
@@ -153,16 +264,16 @@ async function loadKeys() {
     return;
   }
   wrap.innerHTML = `<table class="table">
-    <thead><tr><th>Clé</th><th>Nom</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+    <thead><tr><th>Clé</th><th>Libellé / Client</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
     <tbody>
       ${entries.map(([k, v]) => `
         <tr>
           <td><span class="key-code" onclick="copyKey('${k}')" title="Copier la clé">${k} 📋</span></td>
-          <td><b>${esc(v.name||'—')}</b></td>
-          <td style="color:var(--muted);font-size:0.75rem">${v.created||'—'}</td>
-          <td><span class="sbadge ${v.active?'on':'off'}">${v.active?'ACTIVE':'DÉSACTIVÉE'}</span></td>
-          <td>
-            <button class="btn btn-green" onclick="toggleKey('${k}')">${v.active?'Désactiver':'Activer'}</button>
+          <td><b>${esc(v.label || v.name || 'Client')}</b></td>
+          <td style="color:var(--muted);font-size:0.78rem">${v.created||'—'}</td>
+          <td><span class="sbadge ${v.active !== false ? 'on':'off'}">${v.active !== false ? 'ACTIVE':'DÉSACTIVÉE'}</span></td>
+          <td style="display:flex;gap:8px">
+            <button class="btn btn-green" onclick="toggleKey('${k}')">${v.active !== false ? 'Désactiver':'Activer'}</button>
             <button class="btn btn-red" onclick="deleteKey('${k}')">Supprimer</button>
           </td>
         </tr>
@@ -172,11 +283,11 @@ async function loadKeys() {
 }
 
 async function createKey() {
-  const name = document.getElementById('new-name').value.trim() || 'Nouvelle Clé';
+  const name = document.getElementById('new-name').value.trim() || 'Nouveau Client';
   const r = await fetch('/api/admin/keys/create', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({password: adminPw, name})
+    body: JSON.stringify({password: adminPw, label: name, name: name})
   });
   const d = await r.json();
   if (d.ok) {
@@ -192,6 +303,7 @@ async function toggleKey(key) {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({password: adminPw, key})
   });
+  toast('⚙️ Statut de la clé mis à jour');
   loadKeys();
 }
 
