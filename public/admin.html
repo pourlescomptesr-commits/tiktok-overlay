@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Gestion des Clés</title>
+<title>Admin — Gestion des Clés & IPs</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -74,7 +74,7 @@ body {
 .lock-err { margin-top: 14px; color: var(--red); font-size: 0.85rem; font-weight: 800; display: none; }
 
 #admin-screen {
-  width: 100%; max-width: 860px; padding: 28px; display: none; flex-direction: column; gap: 22px; position: relative; z-index: 10;
+  width: 100%; max-width: 980px; padding: 28px; display: none; flex-direction: column; gap: 22px; position: relative; z-index: 10;
 }
 .header { display: flex; align-items: center; gap: 14px; }
 .htitle {
@@ -98,28 +98,37 @@ body {
 }
 .create-input:focus { border-color: var(--cyan); }
 .btn {
-  padding: 10px 18px; border: none; border-radius: 10px; cursor: pointer;
-  font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;
+  padding: 8px 14px; border: none; border-radius: 10px; cursor: pointer;
+  font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.8px; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
 }
-.btn-purple { background: linear-gradient(135deg, var(--violet), var(--neon-purple)); color: #fff; border: 1px solid var(--cyan); }
+.btn-purple { background: linear-gradient(135deg, var(--violet), var(--neon-purple)); color: #fff; border: 1px solid var(--cyan); padding: 10px 18px; font-size: 0.82rem; }
 .btn-purple:hover { transform: translateY(-2px); filter: brightness(1.2); }
 .btn-red { background: rgba(255,59,92,0.15); border: 1px solid rgba(255,59,92,0.4); color: var(--red); }
 .btn-red:hover { background: var(--red); color: #fff; }
 .btn-green { background: rgba(0,230,118,0.12); border: 1px solid rgba(0,230,118,0.4); color: var(--green); }
 .btn-green:hover { background: var(--green); color: #000; }
+.btn-orange { background: rgba(255,170,0,0.15); border: 1px solid rgba(255,170,0,0.4); color: #ffaa00; }
+.btn-orange:hover { background: #ffaa00; color: #000; }
 
 .table { width: 100%; border-collapse: collapse; }
 .table th { font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: left; padding: 12px 14px; border-bottom: 1.5px solid var(--border); }
 .table td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.88rem; vertical-align: middle; }
 .key-code {
-  font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; color: var(--cyan); font-weight: 700;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; color: var(--cyan); font-weight: 700;
   letter-spacing: 1.5px; cursor: pointer; padding: 6px 12px; background: rgba(0,243,255,0.1); border-radius: 8px;
   display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(0,243,255,0.25);
 }
 .key-code:hover { background: rgba(0,243,255,0.25); }
-.sbadge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 900; }
+.sbadge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 900; }
 .sbadge.on { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
 .sbadge.off { background: rgba(255,59,92,0.15); color: var(--red); border: 1px solid rgba(255,59,92,0.3); }
+
+.ip-badge {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; font-weight: 700;
+  padding: 4px 10px; border-radius: 8px; background: rgba(176, 38, 255, 0.15);
+  color: #ce93d8; border: 1px solid rgba(176, 38, 255, 0.35); display: inline-block;
+}
 
 .toast {
   position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
@@ -151,7 +160,7 @@ body {
 <div id="admin-screen">
   <div class="header">
     <span style="font-size:1.6rem">🗝️</span>
-    <div class="htitle">Gestion des Clés Streamer</div>
+    <div class="htitle">Gestion des Clés Streamer & Anti-Partage IP</div>
     <a class="back-link" href="/">← Retour au Site</a>
   </div>
 
@@ -164,7 +173,7 @@ body {
   </div>
 
   <div class="card">
-    <div class="ctitle">🔑 Liste des Clés et Statuts</div>
+    <div class="ctitle">🔑 Liste des Clés, Adresses IP liées & Sécurité</div>
     <div id="keys-wrap"></div>
   </div>
 </div>
@@ -264,16 +273,29 @@ async function loadKeys() {
     return;
   }
   wrap.innerHTML = `<table class="table">
-    <thead><tr><th>Clé</th><th>Libellé / Client</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Clé</th>
+        <th>Client</th>
+        <th>IP Liée (Anti-Partage)</th>
+        <th>Date</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
     <tbody>
       ${entries.map(([k, v]) => `
         <tr>
           <td><span class="key-code" onclick="copyKey('${k}')" title="Copier la clé">${k} 📋</span></td>
           <td><b>${esc(v.label || v.name || 'Client')}</b></td>
+          <td>
+            ${v.bound_ip ? `<span class="ip-badge">🔒 ${esc(v.bound_ip)}</span>` : `<span class="sbadge on">🌐 Libre (Non liée)</span>`}
+          </td>
           <td style="color:var(--muted);font-size:0.78rem">${v.created||'—'}</td>
           <td><span class="sbadge ${v.active !== false ? 'on':'off'}">${v.active !== false ? 'ACTIVE':'DÉSACTIVÉE'}</span></td>
-          <td style="display:flex;gap:8px">
+          <td style="display:flex;gap:6px">
             <button class="btn btn-green" onclick="toggleKey('${k}')">${v.active !== false ? 'Désactiver':'Activer'}</button>
+            ${v.bound_ip ? `<button class="btn btn-orange" onclick="resetIp('${k}')" title="Réinitialiser l'adresse IP">🔓 Délier IP</button>` : ''}
             <button class="btn btn-red" onclick="deleteKey('${k}')">Supprimer</button>
           </td>
         </tr>
@@ -304,6 +326,17 @@ async function toggleKey(key) {
     body: JSON.stringify({password: adminPw, key})
   });
   toast('⚙️ Statut de la clé mis à jour');
+  loadKeys();
+}
+
+async function resetIp(key) {
+  if (!confirm(`Délier l'adresse IP pour la clé ${key} ? Le client pourra se connecter depuis une nouvelle connexion.`)) return;
+  await fetch('/api/admin/keys/reset_ip', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({password: adminPw, key})
+  });
+  toast('🔓 Adresse IP déliée avec succès !');
   loadKeys();
 }
 
