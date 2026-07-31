@@ -17,14 +17,19 @@ def load_keys():
     if os.path.exists(KEYS_FILE):
         try:
             with open(KEYS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                data = json.load(f)
+                for k, v in data.items():
+                    if isinstance(v, dict):
+                        v.setdefault("label", v.get("name", "Client"))
+                        v.setdefault("active", True)
+                return data
         except Exception:
             pass
     return {
-        "DEMO1234": {"label": "Compte Démo Gratuit", "created": "2026-07-30"},
-        "KEY-5792224B": {"label": "Client #1", "created": "2026-07-30"},
-        "KEY-AA860585": {"label": "Client #2", "created": "2026-07-30"},
-        "KEY-718019E8": {"label": "Client #3", "created": "2026-07-30"}
+        "DEMO1234": {"label": "Compte Démo Gratuit", "created": "2026-07-30", "active": True},
+        "KEY-5792224B": {"label": "Client #1", "created": "2026-07-30", "active": True},
+        "KEY-AA860585": {"label": "Client #2", "created": "2026-07-30", "active": True},
+        "KEY-718019E8": {"label": "Client #3", "created": "2026-07-30", "active": True}
     }
 
 def save_keys(keys):
@@ -42,9 +47,11 @@ def get_key_strict():
     if k:
         k = k.strip().upper()
         if k in VALID_KEYS:
-            return k
+            if VALID_KEYS[k].get("active", True):
+                return k
+            return None
         if k.startswith("KEY-"):
-            VALID_KEYS[k] = {"label": f"Client {k[-4:]}", "created": time.strftime("%Y-%m-%d")}
+            VALID_KEYS[k] = {"label": f"Client {k[-4:]}", "created": time.strftime("%Y-%m-%d"), "active": True}
             save_keys(VALID_KEYS)
             return k
     return None
@@ -52,7 +59,7 @@ def get_key_strict():
 STORES = {}
 
 def get_store(key):
-    if not key or key not in VALID_KEYS:
+    if not key or key not in VALID_KEYS or not VALID_KEYS[key].get("active", True):
         return None
     if key not in STORES:
         STORES[key] = {
@@ -67,8 +74,8 @@ def get_store(key):
             "min_bid_enabled": False,
             "min_bid_val": 1,
             "vouches_val": "100 VOUCHES",
-            "color": "#ffd700",
-            "theme": "hypercode",
+            "color": "#00f3ff",
+            "theme": "cosmic_galaxy",
             "tiktok": "off",
             "tiktok_user": "",
             "cf_url": "",
@@ -97,7 +104,7 @@ def fetch_tiktok_avatar(u):
                 return m.group(1).replace(r'\u002F', '/').replace(r'\/', '/')
     except Exception as e:
         print(f"[Fetch Avatar Error @{u}] {e}", flush=True)
-    return f"https://ui-avatars.com/api/?name={u}&background=ffd700&color=000&font-size=0.55&bold=true"
+    return f"https://ui-avatars.com/api/?name={u}&background=6b11ff&color=fff&font-size=0.55&bold=true"
 
 def update_timer(s):
     now = time.time()
@@ -108,7 +115,6 @@ def update_timer(s):
         s["snipe_rem"] -= elapsed
         if s["snipe_rem"] <= 0:
             s["snipe_rem"] = 0
-            # Auto-relaunch Snipe Delay if TIE occurs at timer end!
             top = sorted(s["players"], key=lambda x: x["coins"], reverse=True)[:2]
             if len(top) >= 2 and top[0]["coins"] == top[1]["coins"] and top[0]["coins"] > 0:
                 s["snipe_on"] = True
@@ -154,7 +160,7 @@ def get_public_state(s):
         "min_bid_val": s["min_bid_val"],
         "vouches_val": s.get("vouches_val", "100 VOUCHES"),
         "color": s["color"],
-        "theme": s.get("theme", "hypercode"),
+        "theme": s.get("theme", "cosmic_galaxy"),
         "tiktok": s["tiktok"],
         "tiktok_user": s["tiktok_user"],
         "cf_url": s["cf_url"],
@@ -187,7 +193,7 @@ def route_panel():
 def route_overlay():
     k = get_key_strict()
     if not k:
-        return "Overlay invalide: Clé manquante", 403
+        return "Overlay invalide: Clé manquante ou désactivée", 403
     return send_from_directory(app.static_folder, 'overlay.html')
 
 @app.route('/admin')
@@ -198,11 +204,14 @@ def route_admin():
 def api_key_verify():
     data = request.get_json(silent=True) or {}
     k = (data.get('key') or '').strip().upper()
-    if k in VALID_KEYS or k.startswith("KEY-"):
-        if k not in VALID_KEYS:
-            VALID_KEYS[k] = {"label": f"Client {k[-4:]}", "created": time.strftime("%Y-%m-%d")}
-            save_keys(VALID_KEYS)
-        return jsonify(ok=True, valid=True, label=VALID_KEYS[k].get('label', 'Streamer'))
+    if k in VALID_KEYS:
+        if not VALID_KEYS[k].get("active", True):
+            return jsonify(ok=False, valid=False, error="Clé désactivée"), 403
+        return jsonify(ok=True, valid=True, label=VALID_KEYS[k].get('label', VALID_KEYS[k].get('name', 'Streamer')))
+    elif k.startswith("KEY-"):
+        VALID_KEYS[k] = {"label": f"Client {k[-4:]}", "created": time.strftime("%Y-%m-%d"), "active": True}
+        save_keys(VALID_KEYS)
+        return jsonify(ok=True, valid=True, label=VALID_KEYS[k].get('label'))
     return jsonify(ok=False, valid=False, error="Clé invalide ou expirée"), 403
 
 @app.route('/api/state')
@@ -499,10 +508,24 @@ def api_admin_keys_create():
 
     import uuid
     new_k = "KEY-" + str(uuid.uuid4())[:8].upper()
-    lbl = data.get('label', 'Nouveau Client')
-    VALID_KEYS[new_k] = {"label": lbl, "created": time.strftime("%Y-%m-%d")}
+    lbl = data.get('name') or data.get('label', 'Nouveau Client')
+    VALID_KEYS[new_k] = {"label": lbl, "name": lbl, "created": time.strftime("%Y-%m-%d"), "active": True}
     save_keys(VALID_KEYS)
     return jsonify(ok=True, key=new_k)
+
+@app.route('/api/admin/keys/toggle', methods=['POST'])
+def api_admin_keys_toggle():
+    data = request.get_json(silent=True) or {}
+    pwd = data.get('password', '') or request.headers.get('X-Admin-Password')
+    if pwd != ADMIN_PASSWORD:
+        return jsonify(error="Non autorisé"), 401
+
+    k_toggle = data.get('key')
+    if k_toggle in VALID_KEYS:
+        curr = VALID_KEYS[k_toggle].get("active", True)
+        VALID_KEYS[k_toggle]["active"] = not curr
+        save_keys(VALID_KEYS)
+    return jsonify(ok=True)
 
 @app.route('/api/admin/keys/delete', methods=['POST'])
 def api_admin_keys_delete():
