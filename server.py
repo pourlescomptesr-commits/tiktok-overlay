@@ -22,14 +22,15 @@ def load_keys():
                     if isinstance(v, dict):
                         v.setdefault("label", v.get("name", "Client"))
                         v.setdefault("active", True)
+                        v.setdefault("bound_ip", None)
                 return data
         except Exception:
             pass
     return {
-        "DEMO1234": {"label": "Compte Démo Gratuit", "created": "2026-07-30", "active": True},
-        "KEY-5792224B": {"label": "Client #1", "created": "2026-07-30", "active": True},
-        "KEY-AA860585": {"label": "Client #2", "created": "2026-07-30", "active": True},
-        "KEY-718019E8": {"label": "Client #3", "created": "2026-07-30", "active": True}
+        "DEMO1234": {"label": "Compte Démo Gratuit", "created": "2026-07-30", "active": True, "bound_ip": None},
+        "KEY-5792224B": {"label": "Client #1", "created": "2026-07-30", "active": True, "bound_ip": None},
+        "KEY-AA860585": {"label": "Client #2", "created": "2026-07-30", "active": True, "bound_ip": None},
+        "KEY-718019E8": {"label": "Client #3", "created": "2026-07-30", "active": True, "bound_ip": None}
     }
 
 def save_keys(keys):
@@ -41,20 +42,51 @@ def save_keys(keys):
 
 VALID_KEYS = load_keys()
 
+def get_client_ip():
+    if request.headers.get('CF-Connecting-IP'):
+        return request.headers.get('CF-Connecting-IP').strip()
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    if request.headers.get('X-Real-IP'):
+        return request.headers.get('X-Real-IP').strip()
+    return request.remote_addr or '127.0.0.1'
+
+def check_key_and_ip(k):
+    if not k:
+        return None, "Clé manquante"
+    k = k.strip().upper()
+    client_ip = get_client_ip()
+
+    if k not in VALID_KEYS:
+        if k.startswith("KEY-"):
+            VALID_KEYS[k] = {
+                "label": f"Client {k[-4:]}",
+                "created": time.strftime("%Y-%m-%d"),
+                "active": True,
+                "bound_ip": client_ip
+            }
+            save_keys(VALID_KEYS)
+            return k, None
+        return None, "Clé invalide ou expirée"
+
+    info = VALID_KEYS[k]
+    if not info.get("active", True):
+        return None, "Clé désactivée"
+
+    bound_ip = info.get("bound_ip")
+    if not bound_ip:
+        info["bound_ip"] = client_ip
+        save_keys(VALID_KEYS)
+    elif bound_ip != client_ip:
+        return None, f"Clé verrouillée sur l'IP {bound_ip} (Votre IP: {client_ip})"
+
+    return k, None
+
 def get_key_strict():
     data = request.get_json(silent=True) or {}
     k = request.args.get('key') or data.get('key') or request.headers.get('X-Streamer-Key')
-    if k:
-        k = k.strip().upper()
-        if k in VALID_KEYS:
-            if VALID_KEYS[k].get("active", True):
-                return k
-            return None
-        if k.startswith("KEY-"):
-            VALID_KEYS[k] = {"label": f"Client {k[-4:]}", "created": time.strftime("%Y-%m-%d"), "active": True}
-            save_keys(VALID_KEYS)
-            return k
-    return None
+    valid_k, err = check_key_and_ip(k)
+    return valid_k
 
 STORES = {}
 
@@ -193,7 +225,7 @@ def route_panel():
 def route_overlay():
     k = get_key_strict()
     if not k:
-        return "Overlay invalide: Clé manquante ou désactivée", 403
+        return "Overlay invalide: Clé manquante, désactivée ou verrouillée sur une autre IP", 403
     return send_from_directory(app.static_folder, 'overlay.html')
 
 @app.route('/admin')
@@ -204,15 +236,11 @@ def route_admin():
 def api_key_verify():
     data = request.get_json(silent=True) or {}
     k = (data.get('key') or '').strip().upper()
-    if k in VALID_KEYS:
-        if not VALID_KEYS[k].get("active", True):
-            return jsonify(ok=False, valid=False, error="Clé désactivée"), 403
-        return jsonify(ok=True, valid=True, label=VALID_KEYS[k].get('label', VALID_KEYS[k].get('name', 'Streamer')))
-    elif k.startswith("KEY-"):
-        VALID_KEYS[k] = {"label": f"Client {k[-4:]}", "created": time.strftime("%Y-%m-%d"), "active": True}
-        save_keys(VALID_KEYS)
-        return jsonify(ok=True, valid=True, label=VALID_KEYS[k].get('label'))
-    return jsonify(ok=False, valid=False, error="Clé invalide ou expirée"), 403
+    valid_k, err = check_key_and_ip(k)
+    if valid_k:
+        info = VALID_KEYS[valid_k]
+        return jsonify(ok=True, valid=True, label=info.get('label', 'Streamer'), bound_ip=info.get('bound_ip'))
+    return jsonify(ok=False, valid=False, error=err or "Clé invalide ou verrouillée sur une autre IP"), 403
 
 @app.route('/api/state')
 def api_state():
@@ -256,136 +284,141 @@ def route_events():
 @app.route('/api/timer', methods=['POST'])
 def api_timer():
     k = get_key_strict()
-    if not k: return jsonify(error="Clé invalide"), 403
-    s = get_store(k)
+    if not k:
+        return jsonify(error="Non autorisé"), 403
 
+    s = get_store(k)
     data = request.get_json(silent=True) or {}
     a = data.get('action')
-    dur = data.get('duration')
-    snipe = data.get('snipe_delay')
-
-    if dur is not None:
-        try:
-            d = max(5, int(dur))
-            s["timer_dur"] = d
-            if not s["timer_on"] and not s["snipe_on"]:
-                s["timer_rem"] = d
-        except Exception: pass
-
-    if snipe is not None:
-        try:
-            s["snipe_dur"] = max(0, int(snipe))
-            if not s["snipe_on"]:
-                s["snipe_rem"] = s["snipe_dur"]
-        except Exception: pass
-
-    s["last_t"] = time.time()
 
     if a == 'start':
+        update_timer(s)
         s["timer_on"] = True
         s["snipe_on"] = False
-        if s["timer_rem"] <= 0: s["timer_rem"] = s["timer_dur"]
+        s["last_t"] = time.time()
     elif a == 'pause':
+        update_timer(s)
         s["timer_on"] = False
         s["snipe_on"] = False
     elif a == 'reset':
-        s["timer_on"] = False
-        s["snipe_on"] = False
         s["timer_rem"] = s["timer_dur"]
         s["snipe_rem"] = s["snipe_dur"]
-    elif a == 'set':
-        if not s["timer_on"] and not s["snipe_on"]:
-            s["timer_rem"] = s["timer_dur"]
+        s["timer_on"] = False
+        s["snipe_on"] = False
+        s["last_t"] = time.time()
     elif a == 'add_time':
-        if s["snipe_on"]:
-            s["snipe_rem"] = s["snipe_dur"]
+        update_timer(s)
+        s["snipe_on"] = True
+        s["snipe_rem"] = s["snipe_dur"] if s["snipe_dur"] > 0 else 10
+        s["last_t"] = time.time()
+    elif a == 'set':
+        dur = int(data.get('duration', 60))
+        snipe = int(data.get('snipe_delay', 10))
+        s["timer_dur"] = dur
+        s["snipe_dur"] = snipe
+        if not s["timer_on"] and not s["snipe_on"]:
+            s["timer_rem"] = dur
+            s["snipe_rem"] = snipe
 
     notify(s)
     return jsonify(ok=True, state=get_public_state(s))
 
 @app.route('/api/config', methods=['POST'])
-@app.route('/api/color', methods=['POST'])
 def api_config():
     k = get_key_strict()
-    if not k: return jsonify(error="Clé invalide"), 403
-    s = get_store(k)
+    if not k:
+        return jsonify(error="Non autorisé"), 403
 
+    s = get_store(k)
     data = request.get_json(silent=True) or {}
-    if 'min_bid_enabled' in data: s["min_bid_enabled"] = bool(data['min_bid_enabled'])
-    if 'min_bid_val' in data:
-        try: s["min_bid_val"] = max(1, int(data['min_bid_val']))
-        except Exception: pass
+    if 'theme' in data:
+        s["theme"] = data['theme']
     if 'vouches_val' in data:
         s["vouches_val"] = str(data['vouches_val'])
-    if 'color' in data: s["color"] = str(data['color'])
-    if 'theme' in data: s["theme"] = str(data['theme'])
+    if 'min_bid_enabled' in data:
+        s["min_bid_enabled"] = bool(data['min_bid_enabled'])
+    if 'min_bid_val' in data:
+        s["min_bid_val"] = max(1, int(data['min_bid_val']))
 
     notify(s)
     return jsonify(ok=True, state=get_public_state(s))
 
-@app.route('/api/player', methods=['POST'])
-@app.route('/api/players', methods=['POST'])
-def api_players():
+@app.route('/api/color', methods=['POST'])
+def api_color():
     k = get_key_strict()
-    if not k: return jsonify(error="Clé invalide"), 403
-    s = get_store(k)
+    if not k:
+        return jsonify(error="Non autorisé"), 403
 
+    s = get_store(k)
+    data = request.get_json(silent=True) or {}
+    c = data.get('color', '#00f3ff')
+    s["color"] = c
+    notify(s)
+    return jsonify(ok=True, state=get_public_state(s))
+
+@app.route('/api/player', methods=['POST'])
+def api_player():
+    k = get_key_strict()
+    if not k:
+        return jsonify(error="Non autorisé"), 403
+
+    s = get_store(k)
     data = request.get_json(silent=True) or {}
     a = data.get('action')
 
     if a == 'add':
-        u = str(data.get('user') or data.get('u') or '').strip().lstrip('@')
-        coins = int(data.get('coins', 100))
+        u = str(data.get('u', '')).strip().lstrip('@')
+        coins = int(data.get('coins', 0))
         if u:
             ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
             if ex:
                 ex["coins"] += coins
             else:
                 av = fetch_tiktok_avatar(u)
-                s["players"].append({
-                    "u": u,
-                    "nick": u,
-                    "name": u,
-                    "av": av,
-                    "coins": coins
-                })
+                s["players"].append({"u": u, "nick": u, "name": u, "av": av, "coins": coins})
 
     elif a == 'coins':
-        u = str(data.get('user') or data.get('u') or '').strip().lstrip('@')
+        u = str(data.get('u', '')).strip().lstrip('@')
         mode = data.get('mode', 'delta')
         val = int(data.get('val', 0))
         ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
         if ex:
-            if mode == 'delta': ex["coins"] = max(0, ex["coins"] + val)
-            elif mode == 'set': ex["coins"] = max(0, val)
+            if mode == 'delta':
+                ex["coins"] = max(0, ex["coins"] + val)
+            elif mode == 'set':
+                ex["coins"] = max(0, val)
 
     elif a == 'remove':
-        u = str(data.get('user') or data.get('u') or '').strip().lstrip('@')
+        u = str(data.get('u', '')).strip().lstrip('@')
         s["players"] = [p for p in s["players"] if p["u"].lower() != u.lower()]
 
     elif a == 'clear':
         s["players"] = []
 
-    elif a == 'reset_coins':
-        for p in s["players"]: p["coins"] = 0
-
-    elif a == 'swap_top2':
-        s["players"].sort(key=lambda x: x["coins"], reverse=True)
-        if len(s["players"]) >= 2:
-            s["players"][0]["coins"], s["players"][1]["coins"] = s["players"][1]["coins"], s["players"][0]["coins"]
-
     elif a == 'equalize_top2':
-        s["players"].sort(key=lambda x: x["coins"], reverse=True)
-        if len(s["players"]) >= 2:
-            top_val = s["players"][0]["coins"]
-            s["players"][1]["coins"] = top_val
+        sorted_p = sorted(s["players"], key=lambda x: x["coins"], reverse=True)
+        if len(sorted_p) >= 2:
+            max_c = sorted_p[0]["coins"]
+            sorted_p[1]["coins"] = max_c
 
     elif a == 'equalize_top3':
-        s["players"].sort(key=lambda x: x["coins"], reverse=True)
-        if len(s["players"]) >= 3:
-            top_val = s["players"][0]["coins"]
-            s["players"][1]["coins"] = top_val
-            s["players"][2]["coins"] = top_val
+        sorted_p = sorted(s["players"], key=lambda x: x["coins"], reverse=True)
+        if len(sorted_p) >= 2:
+            max_c = sorted_p[0]["coins"]
+            sorted_p[1]["coins"] = max_c
+            if len(sorted_p) >= 3:
+                sorted_p[2]["coins"] = max_c
+
+    elif a == 'swap_top2':
+        sorted_p = sorted(s["players"], key=lambda x: x["coins"], reverse=True)
+        if len(sorted_p) >= 2:
+            c0, c1 = sorted_p[0]["coins"], sorted_p[1]["coins"]
+            sorted_p[0]["coins"] = c1
+            sorted_p[1]["coins"] = c0
+
+    elif a == 'reset_coins':
+        for p in s["players"]:
+            p["coins"] = 0
 
     notify(s)
     return jsonify(ok=True, state=get_public_state(s))
@@ -393,9 +426,10 @@ def api_players():
 @app.route('/api/tiktok', methods=['POST'])
 def api_tiktok():
     k = get_key_strict()
-    if not k: return jsonify(error="Clé invalide"), 403
-    s = get_store(k)
+    if not k:
+        return jsonify(error="Non autorisé"), 403
 
+    s = get_store(k)
     data = request.get_json(silent=True) or {}
     a = data.get('action')
 
@@ -509,7 +543,7 @@ def api_admin_keys_create():
     import uuid
     new_k = "KEY-" + str(uuid.uuid4())[:8].upper()
     lbl = data.get('name') or data.get('label', 'Nouveau Client')
-    VALID_KEYS[new_k] = {"label": lbl, "name": lbl, "created": time.strftime("%Y-%m-%d"), "active": True}
+    VALID_KEYS[new_k] = {"label": lbl, "name": lbl, "created": time.strftime("%Y-%m-%d"), "active": True, "bound_ip": None}
     save_keys(VALID_KEYS)
     return jsonify(ok=True, key=new_k)
 
@@ -524,6 +558,19 @@ def api_admin_keys_toggle():
     if k_toggle in VALID_KEYS:
         curr = VALID_KEYS[k_toggle].get("active", True)
         VALID_KEYS[k_toggle]["active"] = not curr
+        save_keys(VALID_KEYS)
+    return jsonify(ok=True)
+
+@app.route('/api/admin/keys/reset_ip', methods=['POST'])
+def api_admin_keys_reset_ip():
+    data = request.get_json(silent=True) or {}
+    pwd = data.get('password', '') or request.headers.get('X-Admin-Password')
+    if pwd != ADMIN_PASSWORD:
+        return jsonify(error="Non autorisé"), 401
+
+    k_reset = data.get('key')
+    if k_reset in VALID_KEYS:
+        VALID_KEYS[k_reset]["bound_ip"] = None
         save_keys(VALID_KEYS)
     return jsonify(ok=True)
 
