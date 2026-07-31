@@ -166,8 +166,8 @@ def api_key_verify():
         if k not in VALID_KEYS:
             VALID_KEYS[k] = {"label": f"Client {k[-4:]}", "created": time.strftime("%Y-%m-%d")}
             save_keys(VALID_KEYS)
-        return jsonify(valid=True, label=VALID_KEYS[k].get('label', 'Streamer'))
-    return jsonify(valid=False, error="Clé invalide ou expirée"), 403
+        return jsonify(ok=True, valid=True, label=VALID_KEYS[k].get('label', 'Streamer'))
+    return jsonify(ok=False, valid=False, error="Clé invalide ou expirée"), 403
 
 @app.route('/api/state')
 def api_state():
@@ -391,7 +391,7 @@ def api_internal_tiktok_status():
         s = STORES[k]
         s["tiktok"] = st
         if st == 'on': s["tiktok_user"] = u
-        elif st == 'off': s["tiktok_user"] = ''
+        elif st == 'off': s["tiktok_user'] = ''
         notify(s)
         return jsonify(ok=True)
     return jsonify(error="Store introuvable"), 404
