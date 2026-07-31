@@ -1,4 +1,4 @@
-import os, time, json, subprocess, sys
+import os, time, json, subprocess, sys, re, urllib.request
 from flask import Flask, request, jsonify, Response, send_from_directory, redirect, render_template_string
 
 try:
@@ -76,6 +76,27 @@ def get_store(key):
             "subs": []
         }
     return STORES[key]
+
+def fetch_tiktok_avatar(u):
+    if not u: return None
+    u = u.strip().lstrip('@')
+    url = f"https://www.tiktok.com/@{u}"
+    req = urllib.request.Request(url, headers={
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9'
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=3.5) as resp:
+            html = resp.read().decode('utf-8', errors='ignore')
+            m1 = re.search(r'avatarLarger":"([^"]+)"', html)
+            m2 = re.search(r'og:image" content="([^"]+)"', html)
+            m3 = re.search(r'avatarMedium":"([^"]+)"', html)
+            m = m1 or m2 or m3
+            if m:
+                return m.group(1).replace(r'\u002F', '/').replace(r'\/', '/')
+    except Exception as e:
+        print(f"[Fetch Avatar Error @{u}] {e}", flush=True)
+    return f"https://ui-avatars.com/api/?name={u}&background=ffd700&color=000&font-size=0.55&bold=true"
 
 def update_timer(s):
     now = time.time()
@@ -301,11 +322,12 @@ def api_players():
             if ex:
                 ex["coins"] += coins
             else:
+                av = fetch_tiktok_avatar(u)
                 s["players"].append({
                     "u": u,
                     "nick": u,
                     "name": u,
-                    "av": f"https://ui-avatars.com/api/?name={u}&background=ffd700&color=000&font-size=0.55&bold=true",
+                    "av": av,
                     "coins": coins
                 })
 
@@ -421,7 +443,7 @@ def api_internal_gift():
         return jsonify(ok=True, ignored="sous le minimum")
 
     if not av:
-        av = f"https://ui-avatars.com/api/?name={u}&background=ffd700&color=000&font-size=0.55&bold=true"
+        av = fetch_tiktok_avatar(u)
 
     ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
     if ex:
