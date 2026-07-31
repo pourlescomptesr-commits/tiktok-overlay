@@ -37,7 +37,8 @@ def save_keys(keys):
 VALID_KEYS = load_keys()
 
 def get_key_from_req():
-    k = request.args.get('key') or (request.json or {}).get('key') or request.headers.get('X-Streamer-Key')
+    data = request.get_json(silent=True) or {}
+    k = request.args.get('key') or data.get('key') or request.headers.get('X-Streamer-Key')
     if not k:
         k = request.referrer and 'key=' in request.referrer and request.referrer.split('key=')[1].split('&')[0]
     if k:
@@ -152,7 +153,7 @@ def route_admin():
 
 @app.route('/api/key/verify', methods=['POST'])
 def api_key_verify():
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     k = (data.get('key') or '').strip().upper()
     if k in VALID_KEYS:
         return jsonify(valid=True, label=VALID_KEYS[k].get('label', 'Streamer'))
@@ -203,7 +204,7 @@ def api_timer():
     s = get_store(k)
     if not s: return jsonify(error="Clé invalide"), 403
 
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     a = data.get('action')
     dur = data.get('duration')
     snipe = data.get('snipe_delay')
@@ -245,7 +246,7 @@ def api_config():
     s = get_store(k)
     if not s: return jsonify(error="Clé invalide"), 403
 
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     if 'min_bid_enabled' in data: s["min_bid_enabled"] = bool(data['min_bid_enabled'])
     if 'min_bid_val' in data:
         try: s["min_bid_val"] = max(1, int(data['min_bid_val']))
@@ -261,7 +262,7 @@ def api_players():
     s = get_store(k)
     if not s: return jsonify(error="Clé invalide"), 403
 
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     a = data.get('action')
 
     if a == 'add':
@@ -324,7 +325,7 @@ def api_tiktok():
     s = get_store(k)
     if not s: return jsonify(error="Clé invalide"), 403
 
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     a = data.get('action')
 
     if a == 'connect':
@@ -360,7 +361,7 @@ def api_tiktok():
 
 @app.route('/api/internal/tiktok_status', methods=['POST'])
 def api_internal_tiktok_status():
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     k = data.get('key')
     st = data.get('status')
     u = data.get('user', '')
@@ -375,7 +376,7 @@ def api_internal_tiktok_status():
 
 @app.route('/api/internal/gift', methods=['POST'])
 def api_internal_gift():
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     k = data.get('key')
     if not k or k not in STORES:
         return jsonify(error="Store introuvable"), 404
@@ -406,7 +407,7 @@ def api_internal_gift():
 
 @app.route('/api/admin/login', methods=['POST'])
 def api_admin_login():
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     pwd = data.get('password', '')
     if pwd == ADMIN_PASSWORD:
         return jsonify(ok=True, token="admin-authenticated-token")
@@ -414,7 +415,7 @@ def api_admin_login():
 
 @app.route('/api/admin/keys', methods=['GET', 'POST'])
 def api_admin_keys():
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     pwd = data.get('password', '') or request.headers.get('X-Admin-Password')
     if pwd != ADMIN_PASSWORD:
         return jsonify(error="Non autorisé"), 401
@@ -422,7 +423,7 @@ def api_admin_keys():
 
 @app.route('/api/admin/keys/create', methods=['POST'])
 def api_admin_keys_create():
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     pwd = data.get('password', '') or request.headers.get('X-Admin-Password')
     if pwd != ADMIN_PASSWORD:
         return jsonify(error="Non autorisé"), 401
@@ -436,7 +437,7 @@ def api_admin_keys_create():
 
 @app.route('/api/admin/keys/delete', methods=['POST'])
 def api_admin_keys_delete():
-    data = request.json or {}
+    data = request.get_json(silent=True) or {}
     pwd = data.get('password', '') or request.headers.get('X-Admin-Password')
     if pwd != ADMIN_PASSWORD:
         return jsonify(error="Non autorisé"), 401
