@@ -78,7 +78,7 @@ def check_key_and_ip(k):
         info["bound_ip"] = client_ip
         save_keys(VALID_KEYS)
     elif bound_ip != client_ip:
-        return None, f"Clé verrouillée sur l'IP {bound_ip} (Votre IP: {client_ip})"
+        return None, "Cette clé est déjà verrouillée sur un autre appareil"
 
     return k, None
 
@@ -225,7 +225,7 @@ def route_panel():
 def route_overlay():
     k = get_key_strict()
     if not k:
-        return "Overlay invalide: Clé manquante, désactivée ou verrouillée sur une autre IP", 403
+        return "Overlay invalide: Clé manquante, désactivée ou déjà verrouillée sur un autre appareil", 403
     return send_from_directory(app.static_folder, 'overlay.html')
 
 @app.route('/admin')
@@ -239,8 +239,8 @@ def api_key_verify():
     valid_k, err = check_key_and_ip(k)
     if valid_k:
         info = VALID_KEYS[valid_k]
-        return jsonify(ok=True, valid=True, label=info.get('label', 'Streamer'), bound_ip=info.get('bound_ip'))
-    return jsonify(ok=False, valid=False, error=err or "Clé invalide ou verrouillée sur une autre IP"), 403
+        return jsonify(ok=True, valid=True, label=info.get('label', 'Streamer'))
+    return jsonify(ok=False, valid=False, error=err or "Clé invalide ou déjà verrouillée sur un autre appareil"), 403
 
 @app.route('/api/state')
 def api_state():
