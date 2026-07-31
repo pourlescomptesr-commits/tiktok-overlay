@@ -92,21 +92,11 @@ def update_timer(s):
         s["timer_rem"] -= elapsed
         if s["timer_rem"] <= 0:
             s["timer_rem"] = 0
-            s["timer_on"] = False
-            s["snipe_on"] = False
-        elif s["timer_rem"] <= s["snipe_dur"] and s["snipe_dur"] > 0:
-            s["snipe_on"] = True
-            s["snipe_rem"] = s["snipe_dur"]
-
-def trigger_snipe_check(s):
-    if s["snipe_on"]:
-        s["snipe_rem"] = s["snipe_dur"]
-    elif s["timer_on"]:
-        if s["timer_rem"] <= s["snipe_dur"] and s["snipe_dur"] > 0:
-            s["snipe_on"] = True
-            s["snipe_rem"] = s["snipe_dur"]
-        else:
-            s["timer_rem"] = min(s["timer_dur"], s["timer_rem"] + s["snipe_dur"])
+            if s["snipe_dur"] > 0:
+                s["snipe_on"] = True
+                s["snipe_rem"] = s["snipe_dur"]
+            else:
+                s["timer_on"] = False
 
 def notify(s):
     payload = json.dumps(get_public_state(s))
@@ -268,7 +258,8 @@ def api_timer():
         if not s["timer_on"] and not s["snipe_on"]:
             s["timer_rem"] = s["timer_dur"]
     elif a == 'add_time':
-        trigger_snipe_check(s)
+        if s["snipe_on"]:
+            s["snipe_rem"] = s["snipe_dur"]
 
     notify(s)
     return jsonify(ok=True, state=get_public_state(s))
@@ -314,10 +305,9 @@ def api_players():
                     "u": u,
                     "nick": u,
                     "name": u,
-                    "av": f"https://unavatar.io/tiktok/{u}",
+                    "av": f"https://ui-avatars.com/api/?name={u}&background=ffd700&color=000&font-size=0.55&bold=true",
                     "coins": coins
                 })
-            trigger_snipe_check(s)
 
     elif a == 'coins':
         u = str(data.get('user') or data.get('u') or '').strip().lstrip('@')
@@ -327,7 +317,6 @@ def api_players():
         if ex:
             if mode == 'delta': ex["coins"] = max(0, ex["coins"] + val)
             elif mode == 'set': ex["coins"] = max(0, val)
-            trigger_snipe_check(s)
 
     elif a == 'remove':
         u = str(data.get('user') or data.get('u') or '').strip().lstrip('@')
@@ -431,8 +420,8 @@ def api_internal_gift():
     if s["min_bid_enabled"] and coins < s["min_bid_val"]:
         return jsonify(ok=True, ignored="sous le minimum")
 
-    if not av or 'dicebear' in av:
-        av = f"https://unavatar.io/tiktok/{u}"
+    if not av:
+        av = f"https://ui-avatars.com/api/?name={u}&background=ffd700&color=000&font-size=0.55&bold=true"
 
     ex = next((p for p in s["players"] if p["u"].lower() == u.lower()), None)
     if ex:
@@ -443,11 +432,13 @@ def api_internal_gift():
         if av: ex["av"] = av
     else:
         s["players"].append({
-            "u": u, "nick": nick or u, "name": nick or u, "av": av or f"https://unavatar.io/tiktok/{u}",
+            "u": u, "nick": nick or u, "name": nick or u, "av": av,
             "coins": coins
         })
 
-    trigger_snipe_check(s)
+    if s["snipe_on"]:
+        s["snipe_rem"] = s["snipe_dur"]
+
     notify(s)
     return jsonify(ok=True)
 
