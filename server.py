@@ -232,6 +232,8 @@ def api_timer():
     if snipe is not None:
         try:
             s["snipe_dur"] = max(0, int(snipe))
+            if not s["snipe_on"]:
+                s["snipe_rem"] = s["snipe_dur"]
         except Exception: pass
 
     s["last_t"] = time.time()
@@ -248,6 +250,9 @@ def api_timer():
         s["snipe_on"] = False
         s["timer_rem"] = s["timer_dur"]
         s["snipe_rem"] = s["snipe_dur"]
+    elif a == 'set':
+        if not s["timer_on"] and not s["snipe_on"]:
+            s["timer_rem"] = s["timer_dur"]
 
     notify(s)
     return jsonify(ok=True, state=get_public_state(s))
