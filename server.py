@@ -1,5 +1,5 @@
 import os, time, json, subprocess, sys
-from flask import Flask, request, jsonify, Response, send_from_directory, render_template_string
+from flask import Flask, request, jsonify, Response, send_from_directory, redirect, render_template_string
 
 try:
     from gevent.pywsgi import WSGIServer
@@ -36,27 +36,24 @@ def save_keys(keys):
 
 VALID_KEYS = load_keys()
 
-def get_key_from_req():
+def get_key_strict():
     data = request.get_json(silent=True) or {}
     k = request.args.get('key') or data.get('key') or request.headers.get('X-Streamer-Key')
-    if not k:
-        if request.referrer and 'key=' in request.referrer:
-            try: k = request.referrer.split('key=')[1].split('&')[0]
-            except Exception: pass
     if k:
         k = k.strip().upper()
-        if k.startswith("KEY-") and k not in VALID_KEYS:
-            VALID_KEYS[k] = {"label": f"Auto Streamer {k[-4:]}", "created": time.strftime("%Y-%m-%d")}
+        if k in VALID_KEYS:
+            return k
+        if k.startswith("KEY-"):
+            VALID_KEYS[k] = {"label": f"Client {k[-4:]}", "created": time.strftime("%Y-%m-%d")}
             save_keys(VALID_KEYS)
-    if not k or k not in VALID_KEYS:
-        k = "DEMO1234"
-    return k
+            return k
+    return None
 
 STORES = {}
 
 def get_store(key):
-    if not key:
-        key = "DEMO1234"
+    if not key or key not in VALID_KEYS:
+        return None
     if key not in STORES:
         STORES[key] = {
             "key": key,
@@ -138,15 +135,23 @@ def add_no_cache_headers(response):
 
 @app.route('/')
 def route_root():
-    k = get_key_from_req()
-    return send_from_directory(app.static_folder, 'panel.html')
+    k = get_key_strict()
+    if k:
+        return redirect(f'/panel?key={k}')
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/panel')
 def route_panel():
+    k = get_key_strict()
+    if not k:
+        return redirect('/')
     return send_from_directory(app.static_folder, 'panel.html')
 
 @app.route('/overlay')
 def route_overlay():
+    k = get_key_strict()
+    if not k:
+        return "Overlay invalide: Clé manquante", 403
     return send_from_directory(app.static_folder, 'overlay.html')
 
 @app.route('/admin')
@@ -157,19 +162,27 @@ def route_admin():
 def api_key_verify():
     data = request.get_json(silent=True) or {}
     k = (data.get('key') or '').strip().upper()
-    if k in VALID_KEYS:
+    if k in VALID_KEYS or k.startswith("KEY-"):
+        if k not in VALID_KEYS:
+            VALID_KEYS[k] = {"label": f"Client {k[-4:]}", "created": time.strftime("%Y-%m-%d")}
+            save_keys(VALID_KEYS)
         return jsonify(valid=True, label=VALID_KEYS[k].get('label', 'Streamer'))
     return jsonify(valid=False, error="Clé invalide ou expirée"), 403
 
 @app.route('/api/state')
 def api_state():
-    k = get_key_from_req()
+    k = get_key_strict()
+    if not k:
+        return jsonify(error="Clé invalide ou manquante"), 403
     s = get_store(k)
     return jsonify(get_public_state(s))
 
 @app.route('/events')
 def route_events():
-    k = get_key_from_req()
+    k = get_key_strict()
+    if not k:
+        return "Clé manquante ou invalide", 403
+
     s = get_store(k)
     q = []
     s["subs"].append(q)
@@ -197,7 +210,8 @@ def route_events():
 
 @app.route('/api/timer', methods=['POST'])
 def api_timer():
-    k = get_key_from_req()
+    k = get_key_strict()
+    if not k: return jsonify(error="Clé invalide"), 403
     s = get_store(k)
 
     data = request.get_json(silent=True) or {}
@@ -238,7 +252,8 @@ def api_timer():
 
 @app.route('/api/config', methods=['POST'])
 def api_config():
-    k = get_key_from_req()
+    k = get_key_strict()
+    if not k: return jsonify(error="Clé invalide"), 403
     s = get_store(k)
 
     data = request.get_json(silent=True) or {}
@@ -253,7 +268,8 @@ def api_config():
 
 @app.route('/api/players', methods=['POST'])
 def api_players():
-    k = get_key_from_req()
+    k = get_key_strict()
+    if not k: return jsonify(error="Clé invalide"), 403
     s = get_store(k)
 
     data = request.get_json(silent=True) or {}
@@ -315,7 +331,8 @@ def trigger_snipe_check(s):
 
 @app.route('/api/tiktok', methods=['POST'])
 def api_tiktok():
-    k = get_key_from_req()
+    k = get_key_strict()
+    if not k: return jsonify(error="Clé invalide"), 403
     s = get_store(k)
 
     data = request.get_json(silent=True) or {}
